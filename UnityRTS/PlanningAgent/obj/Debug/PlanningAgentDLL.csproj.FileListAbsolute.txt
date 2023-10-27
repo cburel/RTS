@@ -1,0 +1,14 @@
+E:\Git\GDD3400_RTS\UnityRTS\RTS\Assets\YourDLL\PlanningAgent.dll
+E:\Git\GDD3400_RTS\UnityRTS\RTS\Assets\YourDLL\PlanningAgent.pdb
+E:\Git\GDD3400_RTS\UnityRTS\PlanningAgent\obj\Debug\PlanningAgentDLL.csproj.CoreCompileInputs.cache
+E:\Git\GDD3400_RTS\UnityRTS\PlanningAgent\bin\Debug\PlanningAgent.dll
+E:\Git\GDD3400_RTS\UnityRTS\PlanningAgent\bin\Debug\PlanningAgent.pdb
+E:\Git\GDD3400_RTS\UnityRTS\PlanningAgent\bin\Debug\GameManager.dll
+E:\Git\GDD3400_RTS\UnityRTS\PlanningAgent\bin\Debug\Preloader.dll
+E:\Git\GDD3400_RTS\UnityRTS\PlanningAgent\bin\Debug\GameManager.pdb
+E:\Git\GDD3400_RTS\UnityRTS\PlanningAgent\bin\Debug\GameManager.xml
+E:\Git\GDD3400_RTS\UnityRTS\PlanningAgent\bin\Debug\Preloader.pdb
+E:\Git\GDD3400_RTS\UnityRTS\PlanningAgent\obj\Debug\PlanningAgentDLL.csproj.CopyComplete
+E:\Git\GDD3400_RTS\UnityRTS\PlanningAgent\obj\Debug\PlanningAgent.dll
+E:\Git\GDD3400_RTS\UnityRTS\PlanningAgent\obj\Debug\PlanningAgent.pdb
+E:\Git\GDD3400_RTS\UnityRTS\PlanningAgent\obj\Debug\PlanningAgentDLL.csprojResolveAssemblyReference.cache
