@@ -1,0 +1,156 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PlanningAgent</name>
+    </assembly>
+    <members>
+        <member name="T:GameManager.PlanningAgent">
+            <summary>Planning Agent is the over-head planner that decided where
+             individual units go and what tasks they perform.  Low-level 
+             AI is handled by other classes (like pathfinding).
+            </summary> 
+        </member>
+        <member name="P:GameManager.PlanningAgent.enemyAgentNbr">
+            <summary>
+            The enemy's agent number
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.mainMineNbr">
+            <summary>
+            My primary mine number
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.mainBaseNbr">
+            <summary>
+            My primary base number
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.mines">
+            <summary>
+            List of all the mines on the map
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.myWorkers">
+            <summary>
+            List of all of my workers
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.mySoldiers">
+            <summary>
+            List of all of my soldiers
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.myArchers">
+            <summary>
+            List of all of my archers
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.myBases">
+            <summary>
+            List of all of my bases
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.myBarracks">
+            <summary>
+            List of all of my barracks
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.myRefineries">
+            <summary>
+            List of all of my refineries
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.enemyWorkers">
+            <summary>
+            List of the enemy's workers
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.enemySoldiers">
+            <summary>
+            List of the enemy's soldiers
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.enemyArchers">
+            <summary>
+            List of enemy's archers
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.enemyBases">
+            <summary>
+            List of the enemy's bases
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.enemyBarracks">
+            <summary>
+            List of the enemy's barracks
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.enemyRefineries">
+            <summary>
+            List of the enemy's refineries
+            </summary>
+        </member>
+        <member name="P:GameManager.PlanningAgent.buildPositions">
+            <summary>
+            List of the possible build positions for a 3x3 unit
+            </summary>
+        </member>
+        <member name="M:GameManager.PlanningAgent.FindProspectiveBuildPositions(GameManager.EnumTypes.UnitType)">
+            <summary>
+            Finds all of the possible build locations for a specific UnitType.
+            Currently, all structures are 3x3, so these positions can be reused
+            for all structures (Base, Barracks, Refinery)
+            Run this once at the beginning of the game and have a list of
+            locations that you can use to reduce later computation.  When you
+            need a location for a build-site, simply pull one off of this list,
+            determine if it is still buildable, determine if you want to use it
+            (perhaps it is too far away or too close or not close enough to a mine),
+            and then simply remove it from the list and build on it!
+            This method is called from the Awake() method to run only once at the
+            beginning of the game.
+            </summary>
+            <param name="unitType">the type of unit you want to build</param>
+        </member>
+        <member name="M:GameManager.PlanningAgent.BuildBuilding(GameManager.EnumTypes.UnitType)">
+            <summary>
+            Build a building
+            </summary>
+            <param name="unitType"></param>
+        </member>
+        <member name="M:GameManager.PlanningAgent.AttackEnemy(System.Collections.Generic.List{System.Int32})">
+            <summary>
+            Attack the enemy
+            </summary>
+            <param name="myTroops"></param>
+        </member>
+        <member name="M:GameManager.PlanningAgent.Learn">
+            <summary>
+            Called at the end of each round before remaining units are
+            destroyed to allow the agent to observe the "win/loss" state
+            </summary>
+        </member>
+        <member name="M:GameManager.PlanningAgent.InitializeMatch">
+            <summary>
+            Called before each match between two agents.  Matches have
+            multiple rounds. 
+            </summary>
+        </member>
+        <member name="M:GameManager.PlanningAgent.InitializeRound">
+            <summary>
+            Called at the beginning of each round in a match.
+            There are multiple rounds in a single match between two agents.
+            </summary>
+        </member>
+        <member name="M:GameManager.PlanningAgent.UpdateGameState">
+            <summary>
+            Updates the game state for the Agent - called once per frame for GameManager
+            Pulls all of the agents from the game and identifies who they belong to
+            </summary>
+        </member>
+        <member name="M:GameManager.PlanningAgent.Update">
+            <summary>
+            Update the GameManager - called once per frame
+            </summary>
+        </member>
+    </members>
+</doc>

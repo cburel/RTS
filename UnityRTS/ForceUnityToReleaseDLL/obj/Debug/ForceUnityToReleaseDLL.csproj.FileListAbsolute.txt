@@ -37,3 +37,8 @@ C:\Git\GDD3400_RTS\UnityRTS\ForceUnityToReleaseDLL\obj\Debug\ForceUnityToRelease
 C:\Git\GDD3400_RTS\UnityRTS\ForceUnityToReleaseDLL\obj\Debug\ForceUnityToReleaseDLL.dll
 C:\Git\GDD3400_RTS\UnityRTS\ForceUnityToReleaseDLL\obj\Debug\ForceUnityToReleaseDLL.pdb
 C:\Git\GDD3400_RTS\UnityRTS\ForceUnityToReleaseDLL\obj\Debug\ForceUnityToReleaseDLL.csproj.AssemblyReference.cache
+D:\UCCS\FA23\GDD3400\apps\repos\RTS\UnityRTS\RTS\Assets\ForceUnityToReleaseDLL.dll
+D:\UCCS\FA23\GDD3400\apps\repos\RTS\UnityRTS\RTS\Assets\ForceUnityToReleaseDLL.pdb
+D:\UCCS\FA23\GDD3400\apps\repos\RTS\UnityRTS\ForceUnityToReleaseDLL\obj\Debug\ForceUnityToReleaseDLL.csproj.CoreCompileInputs.cache
+D:\UCCS\FA23\GDD3400\apps\repos\RTS\UnityRTS\ForceUnityToReleaseDLL\obj\Debug\ForceUnityToReleaseDLL.dll
+D:\UCCS\FA23\GDD3400\apps\repos\RTS\UnityRTS\ForceUnityToReleaseDLL\obj\Debug\ForceUnityToReleaseDLL.pdb

@@ -167,6 +167,7 @@ namespace GameManager
                     {
                         if (GameManager.Instance.IsBoundedAreaBuildable(unitType, toBuild))
                         {
+                            Debug.Log("<color=green>Building!</color>");
                             Build(unit, toBuild, unitType);
                             return;
                         }
@@ -190,6 +191,7 @@ namespace GameManager
                     Unit troopUnit = GameManager.Instance.GetUnit(troopNbr);
                     if (troopUnit.CurrentAction == UnitAction.IDLE)
                     {
+                        Debug.Log("<color=green>Attacking!</color>");
                         // If there are archers to attack
                         if (enemyArchers.Count > 0)
                         {
@@ -273,6 +275,7 @@ namespace GameManager
         public override void InitializeMatch()
         {
             Debug.Log("Moron's: " + AgentName);
+            Debug.Log("<color=red>CBurel</color>");
             //Debug.Log("PlanningAgent::InitializeMatch");
         }
 
