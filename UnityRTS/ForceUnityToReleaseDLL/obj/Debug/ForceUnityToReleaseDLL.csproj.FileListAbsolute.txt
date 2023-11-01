@@ -42,3 +42,4 @@ D:\UCCS\FA23\GDD3400\apps\repos\RTS\UnityRTS\RTS\Assets\ForceUnityToReleaseDLL.p
 D:\UCCS\FA23\GDD3400\apps\repos\RTS\UnityRTS\ForceUnityToReleaseDLL\obj\Debug\ForceUnityToReleaseDLL.csproj.CoreCompileInputs.cache
 D:\UCCS\FA23\GDD3400\apps\repos\RTS\UnityRTS\ForceUnityToReleaseDLL\obj\Debug\ForceUnityToReleaseDLL.dll
 D:\UCCS\FA23\GDD3400\apps\repos\RTS\UnityRTS\ForceUnityToReleaseDLL\obj\Debug\ForceUnityToReleaseDLL.pdb
+D:\UCCS\FA23\GDD3400\apps\repos\RTS\UnityRTS\ForceUnityToReleaseDLL\obj\Debug\ForceUnityToReleaseDLL.csproj.AssemblyReference.cache

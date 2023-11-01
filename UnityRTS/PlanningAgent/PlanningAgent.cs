@@ -18,6 +18,7 @@ namespace GameManager
     public class PlanningAgent : Agent
     {
         private const int MAX_NBR_WORKERS = 20;
+        private PlanningAgent.AgentState currentState;
 
         #region Private Data
 
@@ -25,6 +26,18 @@ namespace GameManager
         // Handy short-cuts for pulling all of the relevant data that you
         // might use for each decision.  Feel free to add your own.
         ///////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// The agent's possible states
+        /// </summary>
+        private enum AgentState
+		{
+            BUILDING_BASE,
+            BUILDING_ARMY,
+            WINNING,
+            DEFENDING,
+            RECOVERING
+		}
 
         /// <summary>
         /// The enemy's agent number
@@ -342,6 +355,42 @@ namespace GameManager
                 enemyRefineries = GameManager.Instance.GetUnitNbrsOfType(UnitType.REFINERY, enemyAgentNbr);
                 Debug.Log("<color=red>Enemy gold</color>: " + GameManager.Instance.GetAgent(enemyAgentNbr).Gold);
             }
+
+            switch (this.currentState)
+			{
+                case PlanningAgent.AgentState.BUILDING_BASE:
+                    if (this.myBases.Count <= 0 || this.myRefineries.Count <= 0 || this.myBarracks.Count <= 0)
+					{
+                        break;                        
+					}
+                    this.currentState = PlanningAgent.AgentState.BUILDING_ARMY;
+                    break;
+
+                case PlanningAgent.AgentState.BUILDING_ARMY:
+                    if (this.myBases.Count == 0 || this.myRefineries.Count == 0 || this.myBarracks.Count == 0)
+                    {
+                        this.currentState = PlanningAgent.AgentState.BUILDING_BASE;
+                        break;
+                    }
+                    if (this.myArchers.Count + this.mySoldiers.Count <= 5 && this.enemyWorkers.Count != 0 && this.mines.Count != 0)
+                    {
+                        break;
+                    }
+                    this.currentState = PlanningAgent.AgentState.WINNING;
+                    break;
+
+                case PlanningAgent.AgentState.WINNING:
+                    if (this.myArchers.Count + this.mySoldiers.Count >= this.enemyArchers.Count + this.enemySoldiers.Count)
+                    {
+                        break;
+                    }
+                    this.currentState = PlanningAgent.AgentState.BUILDING_ARMY;
+                    break;
+
+                default:
+                    this.currentState = PlanningAgent.AgentState.BUILDING_BASE;
+                    break;
+			}
         }
 
         /// <summary>
