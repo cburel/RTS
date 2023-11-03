@@ -10,6 +10,11 @@
              AI is handled by other classes (like pathfinding).
             </summary> 
         </member>
+        <member name="T:GameManager.PlanningAgent.AgentState">
+            <summary>
+            The agent's possible states
+            </summary>
+        </member>
         <member name="P:GameManager.PlanningAgent.enemyAgentNbr">
             <summary>
             The enemy's agent number
