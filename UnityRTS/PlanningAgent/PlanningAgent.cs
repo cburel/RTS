@@ -475,7 +475,7 @@ namespace GameManager
             foreach (int worker in myWorkers)
             {
                 Unit w = GameManager.Instance.GetUnit(worker);
-                if (!w.Equals(null) && w.CurrentAction == null && this.mainBaseNbr >= 0 && this.mainMineNbr >= 0)
+                if (!w.Equals(null) && w.CurrentAction == UnitAction.IDLE && this.mainBaseNbr >= 0 && this.mainMineNbr >= 0)
                 {
                     Unit m = GameManager.Instance.GetUnit(this.mainMineNbr);
                     Unit b = GameManager.Instance.GetUnit(this.mainBaseNbr);
@@ -489,12 +489,12 @@ namespace GameManager
             foreach (int barrack in this.myBarracks)
             {
                 Unit b = GameManager.Instance.GetUnit(barrack);
-                if (!b.Equals(null) && b.IsBuilt && b.CurrentAction == null && this.Gold >= Constants.COST[UnitType.SOLDIER] && !trainArcher)
+                if (!b.Equals(null) && b.IsBuilt && b.CurrentAction == UnitAction.IDLE && this.Gold >= Constants.COST[UnitType.SOLDIER] && !trainArcher)
                 {
                     trainArcher = true;
                     this.Train(b, UnitType.SOLDIER);
                 }
-                if (!b.Equals(null) && b.IsBuilt && b.CurrentAction == null && this.Gold >= Constants.COST[UnitType.ARCHER] && trainArcher)
+                if (!b.Equals(null) && b.IsBuilt && b.CurrentAction == UnitAction.IDLE && this.Gold >= Constants.COST[UnitType.ARCHER] && trainArcher)
                 {
                     trainArcher = false;
                     this.Train(b, UnitType.ARCHER);
@@ -505,7 +505,7 @@ namespace GameManager
             foreach (int myBase in this.myBases)
             {
                 Unit b = GameManager.Instance.GetUnit(myBase);
-                if (!b.Equals(null) && b.IsBuilt && b.CurrentAction == null && this.Gold >= Constants.COST[UnitType.WORKER] && this.myWorkers.Count < 10)
+                if (!b.Equals(null) && b.IsBuilt && b.CurrentAction == UnitAction.IDLE && this.Gold >= Constants.COST[UnitType.WORKER] && this.myWorkers.Count < 10)
                     this.Train(b, UnitType.WORKER);
             }
 
