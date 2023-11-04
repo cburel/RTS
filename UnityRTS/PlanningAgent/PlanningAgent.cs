@@ -438,11 +438,8 @@ namespace GameManager
                 if (this.myBases.Count <= 0 && this.Gold >= Constants.COST[UnitType.BASE])
                 {
                     this.BuildBuilding(UnitType.BASE);
-                }
 
-                // If we have at least one base, assume the first one is our "main" base
-                if (myBases.Count > 0)
-                {
+                    // assume the first base is our main base
                     mainBaseNbr = myBases[0];
                 }
 
