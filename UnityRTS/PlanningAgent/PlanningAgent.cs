@@ -434,15 +434,19 @@ namespace GameManager
                     mainMineNbr = -1;
                 }
 
-                // if we have no base, build one
-                if (this.myBases.Count <= 0 && this.Gold >= Constants.COST[UnitType.BASE])
+                // if we have a base
+                if (myBases.Count > 0)
                 {
-                    this.BuildBuilding(UnitType.BASE);
-
                     // assume the first base is our main base
                     mainBaseNbr = myBases[0];
                 }
 
+                // if we have no base, build one
+                if (this.myBases.Count <= 0 && this.Gold >= Constants.COST[UnitType.BASE])
+                {
+                    this.BuildBuilding(UnitType.BASE);
+                }
+                
                 // if we need barracks or refineries, build them
                 else if (this.myBarracks.Count < 2 && this.Gold >= Constants.COST[UnitType.BARRACKS]) {
                     this.BuildBuilding(UnitType.BARRACKS);
