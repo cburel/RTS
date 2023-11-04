@@ -434,96 +434,82 @@ namespace GameManager
                     mainMineNbr = -1;
                 }
 
+                // if we have no base, build one
+                if (this.myBases.Count <= 0 && this.Gold >= Constants.COST[UnitType.BASE])
+                {
+                    this.BuildBuilding(UnitType.BASE);
+                }
+
                 // If we have at least one base, assume the first one is our "main" base
                 if (myBases.Count > 0)
                 {
                     mainBaseNbr = myBases[0];
                 }
 
-                // If we don't have 2 bases, build a base
-                if (myBases.Count == 0 && this.Gold >= Constants.COST[UnitType.BASE])
-                {
-                    mainBaseNbr = -1;
-                    BuildBuilding(UnitType.BASE);
+                // if we need barracks or refineries, build them
+                else if (this.myBarracks.Count < 2 && this.Gold >= Constants.COST[UnitType.BARRACKS]) {
+                    this.BuildBuilding(UnitType.BARRACKS);
                 }
-
-                // If we don't have any barracks, build a barracks
-                else if (myBarracks.Count == 0 && this.Gold >= Constants.COST[UnitType.BARRACKS])
-                {
-                    BuildBuilding(UnitType.BARRACKS);
+                else if (this.myRefineries.Count < 1 && (double)this.Gold >= (double)Constants.COST[UnitType.REFINERY]) {
+                    this.BuildBuilding(UnitType.REFINERY);
                 }
-
-                // If we don't have any refineries, build a refinery
-                else if (myRefineries.Count == 0 && this.Gold >= Constants.COST[UnitType.REFINERY])
-                {
-                    BuildBuilding(UnitType.REFINERY);
-                }
+                this.DoWork();
             }
 
             if (this.currentState == PlanningAgent.AgentState.BUILDING_ARMY)
             {
-                // For each barracks, determine if it should train a soldier or an archer
-                foreach (int barracksNbr in myBarracks)
+                this.DoWork();
+            }
+
+
+            if (this.currentState == PlanningAgent.AgentState.WINNING)
+            {
+                AttackEnemy(mySoldiers);
+                AttackEnemy(myArchers);
+                this.DoWork();
+            }
+
+        }
+
+        // handles gathering and training
+        private void DoWork() {
+
+            // set workers to gather
+            foreach (int worker in myWorkers)
+            {
+                Unit w = GameManager.Instance.GetUnit(worker);
+                if (!w.Equals(null) && w.CurrentAction == null && this.mainBaseNbr >= 0 && this.mainMineNbr >= 0)
                 {
-                    // Get the barracks
-                    Unit barracksUnit = GameManager.Instance.GetUnit(barracksNbr);
-
-                    // If this barracks still exists, is idle, we need archers, and have gold
-                    if (barracksUnit != null && barracksUnit.IsBuilt
-                             && barracksUnit.CurrentAction == UnitAction.IDLE
-                             && Gold >= Constants.COST[UnitType.ARCHER])
-                    {
-                        Train(barracksUnit, UnitType.ARCHER);
-                    }
-                    // If this barracks still exists, is idle, we need soldiers, and have gold
-                    if (barracksUnit != null && barracksUnit.IsBuilt
-                        && barracksUnit.CurrentAction == UnitAction.IDLE
-                        && Gold >= Constants.COST[UnitType.SOLDIER])
-                    {
-                        Train(barracksUnit, UnitType.SOLDIER);
-                    }
+                    Unit m = GameManager.Instance.GetUnit(this.mainMineNbr);
+                    Unit b = GameManager.Instance.GetUnit(this.mainBaseNbr);
+                    if (!m.Equals(null) && !b.Equals(null) && b.Health > 0.0)
+                        this.Gather(w, m, b);
                 }
+            }
 
-                // For each base, determine if it should train a worker
-                foreach (int baseNbr in myBases)
+            // set soldiers and archers to train
+            bool trainArcher = false;
+            foreach (int barrack in this.myBarracks)
+            {
+                Unit b = GameManager.Instance.GetUnit(barrack);
+                if (!b.Equals(null) && b.IsBuilt && b.CurrentAction == null && this.Gold >= Constants.COST[UnitType.SOLDIER] && !trainArcher)
                 {
-                    // Get the base unit
-                    Unit baseUnit = GameManager.Instance.GetUnit(baseNbr);
-
-                    // If the base exists, is idle, we need a worker, and we have gold
-                    if (baseUnit != null && baseUnit.IsBuilt
-                                         && baseUnit.CurrentAction == UnitAction.IDLE
-                                         && Gold >= Constants.COST[UnitType.WORKER]
-                                         && myWorkers.Count < MAX_NBR_WORKERS)
-                    {
-                        Train(baseUnit, UnitType.WORKER);
-                    }
+                    trainArcher = true;
+                    this.Train(b, UnitType.SOLDIER);
                 }
-
-                // For each worker
-                foreach (int worker in myWorkers)
+                if (!b.Equals(null) && b.IsBuilt && b.CurrentAction == null && this.Gold >= Constants.COST[UnitType.ARCHER] && trainArcher)
                 {
-                    // Grab the unit we need for this function
-                    Unit unit = GameManager.Instance.GetUnit(worker);
-
-                    // Make sure this unit actually exists and is idle
-                    if (unit != null && unit.CurrentAction == UnitAction.IDLE && mainBaseNbr >= 0 && mainMineNbr >= 0)
-                    {
-                        // Grab the mine
-                        Unit mineUnit = GameManager.Instance.GetUnit(mainMineNbr);
-                        Unit baseUnit = GameManager.Instance.GetUnit(mainBaseNbr);
-                        if (mineUnit != null && baseUnit != null && mineUnit.Health > 0)
-                        {
-                            Gather(unit, mineUnit, baseUnit);
-                        }
-                    }
+                    trainArcher = false;
+                    this.Train(b, UnitType.ARCHER);
                 }
+            }
 
-                if (this.currentState == PlanningAgent.AgentState.WINNING)
-                {
-                    AttackEnemy(mySoldiers);
-                    AttackEnemy(myArchers);
-                }
+            // set bases to train workers
+            foreach (int myBase in this.myBases)
+            {
+                Unit b = GameManager.Instance.GetUnit(myBase);
+                if (!b.Equals(null) && b.IsBuilt && b.CurrentAction == null && this.Gold >= Constants.COST[UnitType.WORKER] && this.myWorkers.Count < 10)
+                    this.Train(b, UnitType.WORKER);
             }
 
         }
