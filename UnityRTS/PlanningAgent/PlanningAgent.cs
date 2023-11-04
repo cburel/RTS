@@ -355,50 +355,6 @@ namespace GameManager
                 enemyRefineries = GameManager.Instance.GetUnitNbrsOfType(UnitType.REFINERY, enemyAgentNbr);
                 Debug.Log("<color=red>Enemy gold</color>: " + GameManager.Instance.GetAgent(enemyAgentNbr).Gold);
             }
-
-            switch (this.currentState)
-            {
-                case PlanningAgent.AgentState.BUILDING_BASE:
-                    if (this.myBases.Count <= 0 || this.myRefineries.Count <= 0 || this.myBarracks.Count <= 0)
-                    {
-                        Debug.Log("<color=red>Stay in BUILDING_BASE</color>");
-                        break;
-                    }
-                    Debug.Log("<color=red>Move to BUILDING_ARMY</color>");
-                    this.UpdateState(PlanningAgent.AgentState.BUILDING_ARMY);
-                    break;
-
-                case PlanningAgent.AgentState.BUILDING_ARMY:
-                    if (this.myBases.Count == 0 || this.myRefineries.Count == 0 || this.myBarracks.Count == 0)
-                    {
-                        Debug.Log("<color=red>Move to BUILDING_BASE</color>");
-                        this.UpdateState(PlanningAgent.AgentState.BUILDING_BASE);
-                        break;
-                    }
-                    if (this.myArchers.Count + this.mySoldiers.Count <= 5 && this.enemyWorkers.Count != 0 && this.mines.Count != 0)
-                    {
-                        Debug.Log("<color=red>Stay in BUILDING_ARMY</color>");
-                        break;
-                    }
-                    Debug.Log("<color=red>Move to WINNING</color>");
-                    this.UpdateState(PlanningAgent.AgentState.WINNING);
-                    break;
-
-                case PlanningAgent.AgentState.WINNING:
-                    if (this.myArchers.Count + this.mySoldiers.Count >= this.enemyArchers.Count + this.enemySoldiers.Count)
-                    {
-                        Debug.Log("<color=red>Stay in WINNING</color>");
-                        break;
-                    }
-                    Debug.Log("<color=red>Move to BUILDING_ARMY</color>");
-                    this.UpdateState(PlanningAgent.AgentState.BUILDING_ARMY);
-                    break;
-
-                default:
-                    Debug.Log("<color=red>Default state: BUILDING_BASE</color>");
-                    this.UpdateState(PlanningAgent.AgentState.BUILDING_BASE);
-                    break;
-            }
         }
 
         /// <summary>
@@ -408,6 +364,27 @@ namespace GameManager
         {
             UpdateGameState();
             Debug.Log("<color=green>Current State:</color> " + this.currentState.ToString());
+
+            if (this.myBases.Count == 0 && this.currentState != PlanningAgent.AgentState.BUILDING_BASE)
+            {
+                this.mainBaseNbr = -1;
+                this.UpdateState(PlanningAgent.AgentState.BUILDING_BASE);
+            }
+
+            List<int> myTroops = new List<int>();
+            myTroops.AddRange((IEnumerable<int>)this.mySoldiers);
+            myTroops.AddRange((IEnumerable<int>)this.myArchers);
+
+            List<int> intList = new List<int>();
+            intList.AddRange((IEnumerable<int>)this.myBases);
+            intList.AddRange((IEnumerable<int>)this.myBarracks);
+            intList.AddRange((IEnumerable<int>)this.myRefineries);
+
+            if (intList.Count > 3 && myTroops.Count > 7)
+                this.UpdateState(PlanningAgent.AgentState.WINNING);
+            if (intList.Count > 3 && myTroops.Count < 8)
+                this.UpdateState(PlanningAgent.AgentState.BUILDING_ARMY);
+
 
             if (this.currentState == PlanningAgent.AgentState.BUILDING_BASE)
             {
@@ -454,6 +431,7 @@ namespace GameManager
                 else if (this.myRefineries.Count < 1 && (double)this.Gold >= (double)Constants.COST[UnitType.REFINERY]) {
                     this.BuildBuilding(UnitType.REFINERY);
                 }
+
                 this.DoWork();
             }
 
