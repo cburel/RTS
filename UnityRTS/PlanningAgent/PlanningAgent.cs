@@ -371,18 +371,12 @@ namespace GameManager
                 this.UpdateState(PlanningAgent.AgentState.BUILDING_BASE);
             }
 
-            List<int> myTroops = new List<int>();
-            myTroops.AddRange((IEnumerable<int>)this.mySoldiers);
-            myTroops.AddRange((IEnumerable<int>)this.myArchers);
+            int troopsCount = this.mySoldiers.Count + this.myArchers.Count;
+            int structureCount = this.myBases.Count + this.myBarracks.Count + this.myRefineries.Count;
 
-            List<int> intList = new List<int>();
-            intList.AddRange((IEnumerable<int>)this.myBases);
-            intList.AddRange((IEnumerable<int>)this.myBarracks);
-            intList.AddRange((IEnumerable<int>)this.myRefineries);
-
-            if (intList.Count > 3 && myTroops.Count > 7)
+            if (structureCount > 3 && troopsCount > 7)
                 this.UpdateState(PlanningAgent.AgentState.WINNING);
-            if (intList.Count > 3 && myTroops.Count < 8)
+            if (structureCount > 3 && troopsCount < 8)
                 this.UpdateState(PlanningAgent.AgentState.BUILDING_ARMY);
 
 
