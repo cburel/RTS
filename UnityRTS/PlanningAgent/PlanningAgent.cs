@@ -365,6 +365,7 @@ namespace GameManager
             UpdateGameState();
             Debug.Log("<color=green>Current State:</color> " + this.currentState.ToString());
 
+            // state machine
             if (this.myBases.Count == 0 && this.currentState != PlanningAgent.AgentState.BUILDING_BASE)
             {
                 this.mainBaseNbr = -1;
@@ -378,6 +379,7 @@ namespace GameManager
                 this.UpdateState(PlanningAgent.AgentState.WINNING);
             if (structureCount > 3 && troopsCount < 8)
                 this.UpdateState(PlanningAgent.AgentState.BUILDING_ARMY);
+            // end state machine
 
 
             if (this.currentState == PlanningAgent.AgentState.BUILDING_BASE)
