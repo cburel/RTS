@@ -365,7 +365,7 @@ namespace GameManager
             UpdateGameState();
             Debug.Log("<color=green>Current State:</color> " + this.currentState.ToString());
 
-            // state machine
+            // state machine //
             if (this.myBases.Count == 0 && this.currentState != PlanningAgent.AgentState.BUILDING_BASE)
             {
                 this.mainBaseNbr = -1;
@@ -375,11 +375,20 @@ namespace GameManager
             int troopsCount = this.mySoldiers.Count + this.myArchers.Count;
             int structureCount = this.myBases.Count + this.myBarracks.Count + this.myRefineries.Count;
 
-            if (structureCount > 3 && troopsCount > 7)
+            // heuristics
+            float shouldAttack = Mathf.Clamp(structureCount - 3, 0, 1) * Mathf.Clamp(troopsCount - 7, 0, 1);
+            float shouldBuild = Mathf.Clamp(structureCount - 3, 0, 1) * Mathf.Clamp(troopsCount + 8, 0, 1);
+
+            if (shouldAttack == 1.0)
+            {
                 this.UpdateState(PlanningAgent.AgentState.WINNING);
-            if (structureCount > 3 && troopsCount < 8)
+            }
+            //if (structureCount > 3 && troopsCount < 8)
+            if (shouldBuild == 1.0)
+            {
                 this.UpdateState(PlanningAgent.AgentState.BUILDING_ARMY);
-            // end state machine
+            }
+            // end state machine //
 
 
             if (this.currentState == PlanningAgent.AgentState.BUILDING_BASE)
