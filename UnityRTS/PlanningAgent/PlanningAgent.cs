@@ -467,7 +467,8 @@ namespace GameManager
             foreach (int worker in myWorkers)
             {
                 Unit w = GameManager.Instance.GetUnit(worker);
-                if (!w.Equals(null) && w.CurrentAction == UnitAction.IDLE && this.mainBaseNbr >= 0 && this.mainMineNbr >= 0)
+                float shouldGather = (!w.Equals(null) ? 1 : 0) * (w.CurrentAction == UnitAction.IDLE ? 1 : 0) * Mathf.Clamp(this.mainBaseNbr + 1, 0, 1) * Mathf.Clamp(this.mainMineNbr + 1, 0, 1);
+                if (shouldGather == 1.0)
                 {
                     Unit m = GameManager.Instance.GetUnit(this.mainMineNbr);
                     Unit b = GameManager.Instance.GetUnit(this.mainBaseNbr);
@@ -477,18 +478,20 @@ namespace GameManager
             }
 
             // set soldiers and archers to train
-            bool trainArcher = false;
+            //bool trainArcher = false;
             foreach (int barrack in this.myBarracks)
             {
                 Unit b = GameManager.Instance.GetUnit(barrack);
-                if (!b.Equals(null) && b.IsBuilt && b.CurrentAction == UnitAction.IDLE && this.Gold >= Constants.COST[UnitType.SOLDIER] && !trainArcher)
+                float trainArcher = (!b.Equals(null) ? 1 : 0) *(b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(this.mySoldiers.Count + 15, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.ARCHER], 0.0f, 1f);
+                float trainSoldier = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(this.mySoldiers.Count + 15, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.SOLDIER], 0.0f, 1f);
+                if (trainSoldier == 1.0)
                 {
-                    trainArcher = true;
+                    //trainArcher = true;
                     this.Train(b, UnitType.SOLDIER);
                 }
-                if (!b.Equals(null) && b.IsBuilt && b.CurrentAction == UnitAction.IDLE && this.Gold >= Constants.COST[UnitType.ARCHER] && trainArcher)
+                if (trainArcher == 1.0)
                 {
-                    trainArcher = false;
+                    //trainArcher = false;
                     this.Train(b, UnitType.ARCHER);
                 }
             }
@@ -497,8 +500,11 @@ namespace GameManager
             foreach (int myBase in this.myBases)
             {
                 Unit b = GameManager.Instance.GetUnit(myBase);
-                if (!b.Equals(null) && b.IsBuilt && b.CurrentAction == UnitAction.IDLE && this.Gold >= Constants.COST[UnitType.WORKER] && this.myWorkers.Count < 10)
+                float trainWorker = (!b.Equals(null) ?  1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1: 0) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.WORKER], 0.0f, 1f) * Mathf.Clamp(this.myWorkers.Count + 15, 0, 1);
+                if (trainWorker == 1.0)
+                {
                     this.Train(b, UnitType.WORKER);
+                }
             }
 
         }
