@@ -423,17 +423,22 @@ namespace GameManager
                     mainBaseNbr = myBases[0];
                 }
 
+                float shouldBuildBase = Mathf.Clamp(this.myBases.Count + 1, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BASE], 0.0f, 1f);
+                float shouldBuildBarracks = Mathf.Clamp(this.myBarracks.Count + 2, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BARRACKS], 0.0f, 1f);
+                float shouldBuildRefinery = Mathf.Clamp(this.myRefineries.Count + 1, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.REFINERY], 0.0f, 1f);
+
                 // if we have no base, build one
-                if (this.myBases.Count <= 0 && this.Gold >= Constants.COST[UnitType.BASE])
+                //if (this.myBases.Count <= 0 && this.Gold >= Constants.COST[UnitType.BASE])
+                if (shouldBuildBase == 1.0)
                 {
                     this.BuildBuilding(UnitType.BASE);
                 }
-                
+
                 // if we need barracks or refineries, build them
-                else if (this.myBarracks.Count < 2 && this.Gold >= Constants.COST[UnitType.BARRACKS]) {
+                else if (shouldBuildBarracks == 1.0) {
                     this.BuildBuilding(UnitType.BARRACKS);
                 }
-                else if (this.myRefineries.Count < 1 && (double)this.Gold >= (double)Constants.COST[UnitType.REFINERY]) {
+                else if (shouldBuildRefinery == 1.0) {
                     this.BuildBuilding(UnitType.REFINERY);
                 }
 
