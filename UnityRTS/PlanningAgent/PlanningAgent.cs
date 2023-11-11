@@ -377,14 +377,13 @@ namespace GameManager
 
             // heuristics
             float shouldAttack = Mathf.Clamp(structureCount - 3, 0, 1) * Mathf.Clamp(troopsCount - 7, 0, 1);
-            float shouldBuild = Mathf.Clamp(structureCount - 3, 0, 1) * Mathf.Clamp(troopsCount + 8, 0, 1);
+            float shouldBuildArmy = Mathf.Clamp(structureCount - 3, 0, 1) * Mathf.Clamp(troopsCount + 8, 0, 1);
 
             if (shouldAttack == 1.0)
             {
                 this.UpdateState(PlanningAgent.AgentState.WINNING);
             }
-            //if (structureCount > 3 && troopsCount < 8)
-            if (shouldBuild == 1.0)
+            if (shouldBuildArmy == 1.0)
             {
                 this.UpdateState(PlanningAgent.AgentState.BUILDING_ARMY);
             }
@@ -428,7 +427,6 @@ namespace GameManager
                 float shouldBuildRefinery = Mathf.Clamp(this.myRefineries.Count + 1, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.REFINERY], 0.0f, 1f);
 
                 // if we have no base, build one
-                //if (this.myBases.Count <= 0 && this.Gold >= Constants.COST[UnitType.BASE])
                 if (shouldBuildBase == 1.0)
                 {
                     this.BuildBuilding(UnitType.BASE);
