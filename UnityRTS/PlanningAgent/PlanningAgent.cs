@@ -19,6 +19,11 @@ namespace GameManager
     {
         private const int MAX_NBR_WORKERS = 20;
         private PlanningAgent.AgentState currentState;
+        private int maxWorkers = 15;
+        private int minTroops = 7;
+        private int maxBases = 1;
+        private int maxBarracks = 2;
+        private int maxRefineries = 1;
 
         #region Private Data
 
@@ -374,9 +379,9 @@ namespace GameManager
 
             int troopsCount = this.mySoldiers.Count + this.myArchers.Count;
             int structureCount = this.myBases.Count + this.myBarracks.Count + this.myRefineries.Count;
-            float shouldAttack = Mathf.Clamp(structureCount - 3, 0, 1) * Mathf.Clamp(troopsCount - 7, 0, 1);
+            float shouldAttack = Mathf.Clamp(structureCount - 3, 0, 1) * Mathf.Clamp(troopsCount - this.minTroops, 0, 1);
             Debug.Log("shouldAttack: " + shouldAttack.ToString());
-            float shouldBuildArmy = Mathf.Clamp(structureCount - 3, 0, 1) * Mathf.Clamp(troopsCount + 8, 0, 1);
+            float shouldBuildArmy = Mathf.Clamp(structureCount - 3, 0, 1) * Mathf.Clamp(troopsCount + this.minTroops, 0, 1);
             Debug.Log("shouldBuildArmy: " + shouldBuildArmy.ToString());
 
             if (shouldAttack == 1.0)
@@ -422,11 +427,11 @@ namespace GameManager
                     mainBaseNbr = myBases[0];
                 }
 
-                float shouldBuildBase = Mathf.Clamp(this.myBases.Count + 1, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BASE], 0.0f, 1f);
+                float shouldBuildBase = Mathf.Clamp(this.myBases.Count + this.maxBases, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BASE], 0.0f, 1f);
                 Debug.Log("shouldBuildBase:" + shouldBuildBase.ToString());
-                float shouldBuildBarracks = Mathf.Clamp(this.myBarracks.Count + 2, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BARRACKS], 0.0f, 1f);
+                float shouldBuildBarracks = Mathf.Clamp(this.myBarracks.Count + this.maxBarracks, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BARRACKS], 0.0f, 1f);
                 Debug.Log("shouldBuildBarracks:" + shouldBuildBarracks.ToString());
-                float shouldBuildRefinery = Mathf.Clamp(this.myRefineries.Count + 1, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.REFINERY], 0.0f, 1f);
+                float shouldBuildRefinery = Mathf.Clamp(this.myRefineries.Count + this.maxRefineries, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.REFINERY], 0.0f, 1f);
                 Debug.Log("shouldBuildRefinery:" + shouldBuildRefinery.ToString());
 
                 // if we have no base, build one
@@ -502,7 +507,7 @@ namespace GameManager
             foreach (int myBase in this.myBases)
             {
                 Unit b = GameManager.Instance.GetUnit(myBase);
-                float trainWorker = (!b.Equals(null) ?  1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.WORKER], 0.0f, 1f) * Mathf.Clamp(this.myWorkers.Count + 15, 0, 1);
+                float trainWorker = (!b.Equals(null) ?  1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.WORKER], 0.0f, 1f) * Mathf.Clamp(this.myWorkers.Count + this.maxWorkers, 0, 1);
                 Debug.Log("trainWorker:" + trainWorker.ToString());
                 if (trainWorker == 1.0)
                 {
