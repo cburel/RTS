@@ -21,6 +21,7 @@ namespace GameManager
         private PlanningAgent.AgentState currentState;
         private int maxWorkers = 15;
         private int minTroops = 7;
+        private int maxTroops = 20;
         private int maxBases = 1;
         private int maxBarracks = 2;
         private int maxRefineries = 1;
@@ -466,7 +467,9 @@ namespace GameManager
 
         }
 
-        // handles gathering and training
+        /// <summary>
+        /// handles gathering and training
+        /// </summary>
         private void DoWork() {
 
             // set workers to gather
@@ -487,8 +490,8 @@ namespace GameManager
             foreach (int barrack in this.myBarracks)
             {
                 Unit b = GameManager.Instance.GetUnit(barrack);
-                float trainArcher = (!b.Equals(null) ? 1 : 0) *(b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(this.mySoldiers.Count + 15, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.ARCHER], 0.0f, 1f);
-                float trainSoldier = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(this.mySoldiers.Count + 15, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.SOLDIER], 0.0f, 1f);
+                float trainArcher = (!b.Equals(null) ? 1 : 0) *(b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(this.mySoldiers.Count + this.maxTroops, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.ARCHER], 0.0f, 1f);
+                float trainSoldier = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(this.mySoldiers.Count + this.maxTroops, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.SOLDIER], 0.0f, 1f);
 
                 Debug.Log("trainArcher:" + trainArcher.ToString());
                 Debug.Log("trainSoldier:" + trainSoldier.ToString());
@@ -517,6 +520,10 @@ namespace GameManager
 
         }
 
+        /// <summary>
+        /// prints state of state machine
+        /// </summary>
+        /// <param name="newState"></param>
         private void UpdateState(PlanningAgent.AgentState newState)
         {
             Debug.Log("<color=green>Exiting State: </color>" + this.currentState.ToString());
