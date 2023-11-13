@@ -19,12 +19,17 @@ namespace GameManager
     {
         private const int MAX_NBR_WORKERS = 20;
         private PlanningAgent.AgentState currentState;
-        private int maxWorkers = 15;
-        private int minTroops = 7;
-        private int maxTroops = 20;
-        private int maxBases = 1;
-        private int maxBarracks = 2;
-        private int maxRefineries = 1;
+        private const int maxWorkers = 15;
+        private const int minWorkers = 5;
+        private const int minTroops = 7;
+        private const int maxArchers = 10;
+        private const int minArchers = 5;
+        private const int maxSoldiers = 10;
+        private const int minSoldiers = 5;
+        private const int maxTroops = maxArchers + maxSoldiers;
+        private const int maxBases = 1;
+        private const int maxBarracks = 2;
+        private const int maxRefineries = 1;
 
         #region Private Data
 
@@ -372,26 +377,25 @@ namespace GameManager
             Debug.Log("<color=green>Current State:</color> " + this.currentState.ToString());
 
             // state machine //
+            int troopsCount = this.mySoldiers.Count + this.myArchers.Count;
+            int structureCount = this.myBases.Count + this.myBarracks.Count + this.myRefineries.Count;
+            float shouldAttack = Mathf.Clamp(structureCount - 1, 0, 1) * Mathf.Clamp(troopsCount - minTroops, 0, 1);
+            Debug.Log("shouldAttack: " + shouldAttack.ToString());
+            float shouldBuildArmy = Mathf.Clamp(structureCount - 3, 0, 1) * Mathf.Clamp(minTroops - troopsCount, 0, 1);
+            Debug.Log("shouldBuildArmy: " + shouldBuildArmy.ToString());
+
             if (this.myBases.Count == 0 && this.currentState != PlanningAgent.AgentState.BUILDING_BASE)
             {
                 this.mainBaseNbr = -1;
                 this.UpdateState(PlanningAgent.AgentState.BUILDING_BASE);
             }
-
-            int troopsCount = this.mySoldiers.Count + this.myArchers.Count;
-            int structureCount = this.myBases.Count + this.myBarracks.Count + this.myRefineries.Count;
-            float shouldAttack = Mathf.Clamp(structureCount - 3, 0, 1) * Mathf.Clamp(troopsCount - this.minTroops, 0, 1);
-            Debug.Log("shouldAttack: " + shouldAttack.ToString());
-            float shouldBuildArmy = Mathf.Clamp(structureCount - 3, 0, 1) * Mathf.Clamp(troopsCount + this.minTroops, 0, 1);
-            Debug.Log("shouldBuildArmy: " + shouldBuildArmy.ToString());
-
-            if (shouldAttack == 1.0)
-            {
-                this.UpdateState(PlanningAgent.AgentState.WINNING);
-            }
-            if (shouldBuildArmy == 1.0)
+            else if (shouldBuildArmy == 1.0)
             {
                 this.UpdateState(PlanningAgent.AgentState.BUILDING_ARMY);
+            }
+            else if (shouldAttack == 1.0)
+            {
+                this.UpdateState(PlanningAgent.AgentState.WINNING);
             }
             // end state machine //
 
@@ -428,11 +432,11 @@ namespace GameManager
                     mainBaseNbr = myBases[0];
                 }
 
-                float shouldBuildBase = Mathf.Clamp(this.myBases.Count + this.maxBases, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BASE], 0.0f, 1f);
+                float shouldBuildBase = Mathf.Clamp(maxBases - this.myBases.Count, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BASE], 0.0f, 1f);
                 Debug.Log("shouldBuildBase:" + shouldBuildBase.ToString());
-                float shouldBuildBarracks = Mathf.Clamp(this.myBarracks.Count + this.maxBarracks, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BARRACKS], 0.0f, 1f);
+                float shouldBuildBarracks = Mathf.Clamp(maxBarracks - this.myBarracks.Count, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BARRACKS], 0.0f, 1f);
                 Debug.Log("shouldBuildBarracks:" + shouldBuildBarracks.ToString());
-                float shouldBuildRefinery = Mathf.Clamp(this.myRefineries.Count + this.maxRefineries, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.REFINERY], 0.0f, 1f);
+                float shouldBuildRefinery = Mathf.Clamp(maxRefineries - this.myRefineries.Count, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.REFINERY], 0.0f, 1f);
                 Debug.Log("shouldBuildRefinery:" + shouldBuildRefinery.ToString());
 
                 // if we have no base, build one
@@ -441,11 +445,11 @@ namespace GameManager
                     this.BuildBuilding(UnitType.BASE);
                 }
 
-                // if we need barracks or refineries, build them
-                else if (shouldBuildBarracks == 1.0) {
+                // if we need barracks or refineries and have the appropriate dependency, build them
+                else if (shouldBuildBarracks == 1.0 && this.myBases.Count > 0) {
                     this.BuildBuilding(UnitType.BARRACKS);
                 }
-                else if (shouldBuildRefinery == 1.0) {
+                else if (shouldBuildRefinery == 1.0 && this.myBarracks.Count > 0) {
                     this.BuildBuilding(UnitType.REFINERY);
                 }
 
@@ -490,31 +494,37 @@ namespace GameManager
             foreach (int barrack in this.myBarracks)
             {
                 Unit b = GameManager.Instance.GetUnit(barrack);
-                float trainArcher = (!b.Equals(null) ? 1 : 0) *(b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(this.mySoldiers.Count + this.maxTroops, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.ARCHER], 0.0f, 1f);
-                float trainSoldier = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(this.mySoldiers.Count + this.maxTroops, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.SOLDIER], 0.0f, 1f);
 
-                Debug.Log("trainArcher:" + trainArcher.ToString());
-                Debug.Log("trainSoldier:" + trainSoldier.ToString());
+                // if we have at least one soldier, save gold to build refinery.
+                // if we have no soldiers, train one.
+                if (mySoldiers.Count < minSoldiers || myArchers.Count < minArchers || myRefineries.Count > 0) {
+                    float trainArcher = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(maxArchers - myArchers.Count, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.ARCHER], 0.0f, 1f);
+                    Debug.Log("trainArcher:" + trainArcher.ToString() + ", <color=red>numArchers: </color>" + myArchers.Count.ToString());
+                    if (trainArcher == 1.0)
+                    {
+                        this.Train(b, UnitType.ARCHER);
+                    }
 
-                if (trainSoldier == 1.0)
-                {
-                    this.Train(b, UnitType.SOLDIER);
-                }
-                if (trainArcher == 1.0)
-                {
-                    this.Train(b, UnitType.ARCHER);
+                    float trainSoldier = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(maxSoldiers - mySoldiers.Count, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.SOLDIER], 0.0f, 1f);
+                    Debug.Log("trainSoldier:" + trainSoldier.ToString());
+                    if (trainSoldier == 1.0)
+                    {
+                        this.Train(b, UnitType.SOLDIER);
+                    }
                 }
             }
 
             // set bases to train workers
             foreach (int myBase in this.myBases)
             {
-                Unit b = GameManager.Instance.GetUnit(myBase);
-                float trainWorker = (!b.Equals(null) ?  1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.WORKER], 0.0f, 1f) * Mathf.Clamp(this.myWorkers.Count + this.maxWorkers, 0, 1);
-                Debug.Log("trainWorker:" + trainWorker.ToString());
-                if (trainWorker == 1.0)
-                {
-                    this.Train(b, UnitType.WORKER);
+                if (myWorkers.Count < minWorkers || (mySoldiers.Count >= maxSoldiers && myArchers.Count >= maxArchers)) {
+                    Unit b = GameManager.Instance.GetUnit(myBase);
+                    float trainWorker = (!b.Equals(null) ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.WORKER], 0.0f, 1f) * Mathf.Clamp(maxWorkers - myWorkers.Count, 0, 1);
+                    Debug.Log("trainWorker:" + trainWorker.ToString());
+                    if (trainWorker == 1.0)
+                    {
+                        this.Train(b, UnitType.WORKER);
+                    }
                 }
             }
 

@@ -34,7 +34,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>Mine.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>CelesteB.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="GameManager, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -248,6 +248,7 @@
     <None Include="AJT.snk" />
     <None Include="AjT2.snk" />
     <None Include="AjT3.snk" />
+    <None Include="CelesteB.snk" />
     <None Include="CKB.snk" />
     <None Include="CkB3.snk" />
     <None Include="CodyT.snk" />

@@ -157,5 +157,16 @@
             Update the GameManager - called once per frame
             </summary>
         </member>
+        <member name="M:GameManager.PlanningAgent.DoWork">
+            <summary>
+            handles gathering and training
+            </summary>
+        </member>
+        <member name="M:GameManager.PlanningAgent.UpdateState(GameManager.PlanningAgent.AgentState)">
+            <summary>
+            prints state of state machine
+            </summary>
+            <param name="newState"></param>
+        </member>
     </members>
 </doc>
