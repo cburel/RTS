@@ -6,7 +6,7 @@ using UnityEngine;
 using System;
 
 /////////////////////////////////////////////////////////////////////////////
-// This is the Moron Agent
+// This is Celeste Burel's Agent
 /////////////////////////////////////////////////////////////////////////////
 
 namespace GameManager
@@ -30,6 +30,18 @@ namespace GameManager
         private const int maxBases = 1;
         private const int maxBarracks = 2;
         private const int maxRefineries = 1;
+
+        // used for learn method
+        private int LEARN_MAX_WORKERS = maxWorkers;
+        private int LEARN_MIN_WORKERS = minWorkers;
+        private int LEARN_MAX_ARCHERS = maxArchers;
+        private int LEARN_MIN_ARCHERS = minArchers;
+        private int LEARN_MAX_SOLDIERS = maxSoldiers;
+        private int LEARN_MIN_SOLDIERS = minSoldiers;
+        private int LEARN_MAX_TROOPS = maxTroops;
+        private int LEARN_MAX_BASES = maxBases;
+        private int LEARN_MAX_BARRACKS = maxBarracks;
+        private int LEARN_MAX_REFINERIES = maxRefineries;
 
         #region Private Data
 
@@ -298,8 +310,7 @@ namespace GameManager
         /// </summary>
         public override void InitializeMatch()
         {
-            Debug.Log("Moron's: " + AgentName);
-            Debug.Log("<color=red>CBurel</color>");
+            Debug.Log("Celeste's: " + AgentName);
             //Debug.Log("PlanningAgent::InitializeMatch");
         }
 
