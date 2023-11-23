@@ -382,6 +382,8 @@ namespace GameManager
             enemyBases = new List<int>();
             enemyBarracks = new List<int>();
             enemyRefineries = new List<int>();
+
+            ResetLearningMetrics();
         }
 
         /// <summary>
@@ -491,14 +493,17 @@ namespace GameManager
                 if (shouldBuildBase == 1.0)
                 {
                     this.BuildBuilding(UnitType.BASE);
+                    ++this.totalMyBases;
                 }
 
                 // if we need barracks or refineries and have the appropriate dependency, build them
                 else if (shouldBuildBarracks == 1.0 && this.myBases.Count > 0) {
                     this.BuildBuilding(UnitType.BARRACKS);
+                    ++this.totalMyBarracks;
                 }
                 else if (shouldBuildRefinery == 1.0 && this.myBarracks.Count > 0) {
                     this.BuildBuilding(UnitType.REFINERY);
+                    ++this.totalMyRefineries;
                 }
 
                 this.DoWork();
@@ -551,6 +556,7 @@ namespace GameManager
                     if (trainArcher == 1.0)
                     {
                         this.Train(b, UnitType.ARCHER);
+                        ++this.totalMyArchers;
                     }
 
                     float trainSoldier = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(maxSoldiers - mySoldiers.Count, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.SOLDIER], 0.0f, 1f);
@@ -558,6 +564,7 @@ namespace GameManager
                     if (trainSoldier == 1.0)
                     {
                         this.Train(b, UnitType.SOLDIER);
+                        ++this.totalMySoldiers;
                     }
                 }
             }
@@ -572,6 +579,7 @@ namespace GameManager
                     if (trainWorker == 1.0)
                     {
                         this.Train(b, UnitType.WORKER);
+                        ++this.totalMyWorkers;
                     }
                 }
             }
@@ -587,6 +595,29 @@ namespace GameManager
             Debug.Log("<color=green>Exiting State: </color>" + this.currentState.ToString());
             this.currentState = newState;
             Debug.Log("<color=green>Entering State: </color>" + this.currentState.ToString());
+        }
+
+
+        /// <summary>
+        /// resets data totals for learning
+        /// </summary>
+        private void ResetLearningMetrics()
+        {
+            // used to track data for learning
+            totalMyWorkers = 0;
+            totalMySoldiers = 0;
+            totalMyArchers = 0;
+            totalMyBases = 0;
+            totalMyBarracks = 0;
+            totalMyRefineries = 0;
+            totalMyGold = 0;
+            totalEnemyWorkers = 0;
+            totalEnemySoldiers = 0;
+            totalEnemyArchers = 0;
+            totalEnemyBases = 0;
+            totalEnemyBarracks = 0;
+            totalEnemyRefineries = 0;
+            totalEnemyGold = 0;
         }
 
         #endregion
