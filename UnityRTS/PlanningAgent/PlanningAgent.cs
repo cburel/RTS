@@ -42,6 +42,23 @@ namespace GameManager
         private int LEARN_MAX_BASES = maxBases;
         private int LEARN_MAX_BARRACKS = maxBarracks;
         private int LEARN_MAX_REFINERIES = maxRefineries;
+        private bool win = false;
+
+        // used to track data for learning
+        private int totalMyWorkers = 0;
+        private int totalMySoldiers = 0;
+        private int totalMyArchers = 0;
+        private int totalMyBases = 0;
+        private int totalMyBarracks = 0;
+        private int totalMyRefineries = 0;
+        private int totalMyGold = 0;
+        private int totalEnemyWorkers = 0;
+        private int totalEnemySoldiers = 0;
+        private int totalEnemyArchers = 0;
+        private int totalEnemyBases = 0;
+        private int totalEnemyBarracks = 0;
+        private int totalEnemyRefineries = 0;
+        private int totalEnemyGold = 0;
 
         #region Private Data
 
@@ -296,6 +313,26 @@ namespace GameManager
         public override void Learn()
         {
             Debug.Log("Nbr Wins: " + AgentNbrWins);
+
+            // check to ensure all enemy units are destroyed
+            if (this.enemyArchers.Count + this.enemySoldiers.Count + this.enemyWorkers.Count + this.enemyBases.Count + this.enemyBarracks.Count + this.enemyRefineries.Count == 0)
+            {
+
+            }
+
+            // if we won, keep on learning trajectory
+            if (win)
+            {
+
+            }
+
+            // if we lost, switch trajectory
+            else
+            {
+
+            }
+
+            Debug.Log("Win: " + win.ToString());
 
             //Debug.Log("PlanningAgent::Learn");
             Log("value 1");
