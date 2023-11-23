@@ -32,17 +32,19 @@ namespace GameManager
         private const int maxRefineries = 1;
 
         // used for learn method
-        private int LEARN_MAX_WORKERS = maxWorkers;
-        private int LEARN_MIN_WORKERS = minWorkers;
-        private int LEARN_MAX_ARCHERS = maxArchers;
-        private int LEARN_MIN_ARCHERS = minArchers;
-        private int LEARN_MAX_SOLDIERS = maxSoldiers;
-        private int LEARN_MIN_SOLDIERS = minSoldiers;
-        private int LEARN_MAX_TROOPS = maxTroops;
-        private int LEARN_MAX_BASES = maxBases;
-        private int LEARN_MAX_BARRACKS = maxBarracks;
-        private int LEARN_MAX_REFINERIES = maxRefineries;
+        private const int LEARN_MAX_WORKERS = 0;
+        private const int LEARN_MIN_WORKERS = 1;
+        private const int LEARN_MAX_ARCHERS = 2;
+        private const int LEARN_MIN_ARCHERS = 3;
+        private const int LEARN_MAX_SOLDIERS = 4;
+        private const int LEARN_MIN_SOLDIERS = 5;
+        private const int LEARN_MAX_TROOPS = 6;
+        private const int LEARN_MAX_BASES = 7;
+        private const int LEARN_MAX_BARRACKS = 8;
+        private const int LEARN_MAX_REFINERIES = 9;
+        private int[] semiconstants = new int[10];
         private bool win = false;
+        private int semiConstRoundCounter = 0;
 
         // used to track data for learning
         private int totalMyWorkers = 0;
