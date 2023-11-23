@@ -51,14 +51,6 @@ namespace GameManager
         private int totalMyBases = 0;
         private int totalMyBarracks = 0;
         private int totalMyRefineries = 0;
-        private int totalMyGold = 0;
-        private int totalEnemyWorkers = 0;
-        private int totalEnemySoldiers = 0;
-        private int totalEnemyArchers = 0;
-        private int totalEnemyBases = 0;
-        private int totalEnemyBarracks = 0;
-        private int totalEnemyRefineries = 0;
-        private int totalEnemyGold = 0;
 
         #region Private Data
 
@@ -317,7 +309,7 @@ namespace GameManager
             // check to ensure all enemy units are destroyed
             if (this.enemyArchers.Count + this.enemySoldiers.Count + this.enemyWorkers.Count + this.enemyBases.Count + this.enemyBarracks.Count + this.enemyRefineries.Count == 0)
             {
-
+                win = true;
             }
 
             // if we won, keep on learning trajectory
@@ -335,10 +327,22 @@ namespace GameManager
             Debug.Log("Win: " + win.ToString());
 
             //Debug.Log("PlanningAgent::Learn");
-            Log("value 1");
-            Log("value 2");
-            Log("value 3a, 3b");
-            Log("value 4");
+            Log("total my workers: " + totalMyWorkers.ToString());
+            Log("total my soldiers: " + totalMySoldiers.ToString());
+            Log("total my archers: " + totalMyArchers.ToString());
+            Log("total my bases: " + totalMyBases.ToString());
+            Log("total my barracks: " + totalMyBarracks.ToString());
+            Log("total my refineries: " + totalMyRefineries.ToString());
+            Log("max workers: " + LEARN_MAX_WORKERS.ToString());
+            Log("min workers: " + LEARN_MIN_WORKERS.ToString());
+            Log("max soldiers: " + LEARN_MAX_SOLDIERS.ToString());
+            Log("min soldiers: " + LEARN_MIN_SOLDIERS.ToString());
+            Log("max archers: " + LEARN_MAX_ARCHERS.ToString());
+            Log("min archers: " + LEARN_MIN_ARCHERS.ToString());
+            Log("max troops: " + LEARN_MAX_TROOPS.ToString());
+            Log("max bases: " + LEARN_MAX_BASES.ToString());
+            Log("max barracks: " + LEARN_MAX_BARRACKS.ToString());
+            Log("max refineries: " + LEARN_MAX_REFINERIES.ToString());
         }
 
         /// <summary>
@@ -383,6 +387,7 @@ namespace GameManager
             enemyBarracks = new List<int>();
             enemyRefineries = new List<int>();
 
+            // reset learning metric totals
             ResetLearningMetrics();
         }
 
@@ -425,7 +430,7 @@ namespace GameManager
         {
             UpdateGameState();
             Debug.Log("<color=green>Current State:</color> " + this.currentState.ToString());
-
+            
             // state machine //
             int troopsCount = this.mySoldiers.Count + this.myArchers.Count;
             int structureCount = this.myBases.Count + this.myBarracks.Count + this.myRefineries.Count;
@@ -539,7 +544,9 @@ namespace GameManager
                     Unit m = GameManager.Instance.GetUnit(this.mainMineNbr);
                     Unit b = GameManager.Instance.GetUnit(this.mainBaseNbr);
                     if (!m.Equals(null) && !b.Equals(null) && b.Health > 0.0)
+                    {
                         this.Gather(w, m, b);
+                    }
                 }
             }
 
@@ -610,14 +617,6 @@ namespace GameManager
             totalMyBases = 0;
             totalMyBarracks = 0;
             totalMyRefineries = 0;
-            totalMyGold = 0;
-            totalEnemyWorkers = 0;
-            totalEnemySoldiers = 0;
-            totalEnemyArchers = 0;
-            totalEnemyBases = 0;
-            totalEnemyBarracks = 0;
-            totalEnemyRefineries = 0;
-            totalEnemyGold = 0;
         }
 
         #endregion
