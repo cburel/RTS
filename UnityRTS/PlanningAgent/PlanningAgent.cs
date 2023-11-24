@@ -19,17 +19,16 @@ namespace GameManager
     {
         private const int MAX_NBR_WORKERS = 20;
         private PlanningAgent.AgentState currentState;
-        private const int maxWorkers = 15;
-        private const int minWorkers = 5;
-        private const int minTroops = 7;
-        private const int maxArchers = 10;
-        private const int minArchers = 5;
-        private const int maxSoldiers = 10;
-        private const int minSoldiers = 5;
-        private const int maxTroops = maxArchers + maxSoldiers;
-        private const int maxBases = 1;
-        private const int maxBarracks = 2;
-        private const int maxRefineries = 1;
+        private int maxWorkers = 15;
+        private int minWorkers = 5;
+        private int minTroops = 7;
+        private int maxArchers = 10;
+        private int minArchers = 5;
+        private int maxSoldiers = 10;
+        private int minSoldiers = 5;
+        private int maxBases = 1;
+        private int maxBarracks = 2;
+        private int maxRefineries = 1;
 
         // used for learn method
         private const int LEARN_MAX_WORKERS = 0;
@@ -38,13 +37,15 @@ namespace GameManager
         private const int LEARN_MIN_ARCHERS = 3;
         private const int LEARN_MAX_SOLDIERS = 4;
         private const int LEARN_MIN_SOLDIERS = 5;
-        private const int LEARN_MAX_TROOPS = 6;
-        private const int LEARN_MAX_BASES = 7;
-        private const int LEARN_MAX_BARRACKS = 8;
-        private const int LEARN_MAX_REFINERIES = 9;
-        private int[] semiconstants = new int[10];
+        private const int LEARN_MAX_BASES = 6;
+        private const int LEARN_MAX_BARRACKS = 7;
+        private const int LEARN_MAX_REFINERIES = 8;
+        private int[] semiconstants = new int[9];
         private bool win = false;
         private int semiConstRoundCounter = 0;
+        private int[] roundResults = new int[3];
+        private int searchDirection = -1;
+        private int currSemiconstant = 0;
 
         // used to track data for learning
         private int totalMyWorkers = 0;
@@ -158,6 +159,86 @@ namespace GameManager
         /// </summary>
         private List<Vector3Int> buildPositions { get; set; }
 
+        #region learning metrics
+
+        private int LearnMaxWorkers()
+        {
+            return semiconstants[LEARN_MAX_WORKERS];
+        }
+
+        private int LearnMinWorkers()
+        {
+            return semiconstants[LEARN_MIN_WORKERS];
+        }
+
+        private int LearnMaxArchers()
+        {
+            return semiconstants[LEARN_MAX_ARCHERS];
+        }
+
+        private int LearnMinArchers()
+        {
+            return semiconstants[LEARN_MIN_ARCHERS];
+        }
+
+        private int LearnMaxSoldiers()
+        {
+            return semiconstants[LEARN_MAX_SOLDIERS];
+        }
+
+        private int LearnMinSoldiers()
+        {
+            return semiconstants[LEARN_MIN_SOLDIERS];
+        }
+
+        private int LearnMaxBases()
+        {
+            return semiconstants[LEARN_MAX_BASES];
+        }
+
+        private int LearnMaxBarracks()
+        {
+            return semiconstants[LEARN_MAX_BARRACKS];
+        }
+
+        private int LearnMaxRefineries()
+        {
+            return semiconstants[LEARN_MAX_REFINERIES];
+        }
+
+        private void Unpack()
+        {
+            maxWorkers = LearnMaxWorkers();
+            minWorkers = LearnMinWorkers();
+            maxArchers = LearnMaxArchers();
+            minArchers = LearnMinArchers();
+            maxSoldiers = LearnMaxSoldiers();
+            minSoldiers = LearnMinSoldiers();
+            maxBases = LearnMaxBases();
+            maxBarracks = LearnMaxBarracks();
+            maxRefineries = LearnMaxRefineries();
+        }
+
+        private void Pack()
+        {
+            semiconstants[LEARN_MAX_WORKERS] = maxWorkers;
+            semiconstants[LEARN_MIN_WORKERS] = minWorkers;
+            semiconstants[LEARN_MAX_ARCHERS] = maxArchers;
+            semiconstants[LEARN_MIN_ARCHERS] = minArchers;
+            semiconstants[LEARN_MAX_SOLDIERS] = maxSoldiers;
+            semiconstants[LEARN_MIN_SOLDIERS] = minSoldiers;
+            semiconstants[LEARN_MAX_BASES] = maxBases;
+            semiconstants[LEARN_MAX_BARRACKS] = maxBarracks;
+            semiconstants[LEARN_MAX_REFINERIES] = maxRefineries;
+        }
+
+        private int ComputeWinMetric()
+        {
+            return (this.mySoldiers.Count + this.myArchers.Count) - (this.enemySoldiers.Count + this.enemyArchers.Count);
+        }
+
+        #endregion
+    
         /// <summary>
         /// Finds all of the possible build locations for a specific UnitType.
         /// Currently, all structures are 3x3, so these positions can be reused
@@ -308,6 +389,39 @@ namespace GameManager
         {
             Debug.Log("Nbr Wins: " + AgentNbrWins);
 
+            // compute new numbers every x rounds
+            if () {
+
+                if (semiConstRoundCounter < 3) {
+                    roundResults[semiConstRoundCounter] = ComputeWinMetric();
+
+                    if (semiConstRoundCounter == 0)
+                    {
+                        semiconstants[currSemiconstant] += 1;
+                    }
+                    else if (semiConstRoundCounter == 1)
+                    {
+                        semiconstants[currSemiconstant] -= 2;
+                    }
+                }
+                else
+                {
+                    // determine which way on the slope to learn
+                    int slopeUp = roundResults[1] - roundResults[0];
+                    int slopDown = roundResults[2] - roundResults[0];
+
+                    if (slopeUp > slopDown)
+                    {
+                        searchDirection = 1;
+                    }
+                    else
+                    {
+                        searchDirection = -1;
+                    }
+
+                    semiconstants[currSemiconstant] += searchDirection * 1;
+                }
+            }
             // check to ensure all enemy units are destroyed
             if (this.enemyArchers.Count + this.enemySoldiers.Count + this.enemyWorkers.Count + this.enemyBases.Count + this.enemyBarracks.Count + this.enemyRefineries.Count == 0)
             {
@@ -341,7 +455,6 @@ namespace GameManager
             Log("min soldiers: " + LEARN_MIN_SOLDIERS.ToString());
             Log("max archers: " + LEARN_MAX_ARCHERS.ToString());
             Log("min archers: " + LEARN_MIN_ARCHERS.ToString());
-            Log("max troops: " + LEARN_MAX_TROOPS.ToString());
             Log("max bases: " + LEARN_MAX_BASES.ToString());
             Log("max barracks: " + LEARN_MAX_BARRACKS.ToString());
             Log("max refineries: " + LEARN_MAX_REFINERIES.ToString());
