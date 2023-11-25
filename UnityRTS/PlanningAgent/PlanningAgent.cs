@@ -46,6 +46,14 @@ namespace GameManager
         private int[] roundResults = new int[3];
         private int searchDirection = -1;
         private int currSemiconstant = 0;
+        private bool gatherData = true;
+        private int dataPoints = 2;
+        private float dataAverage = 0;
+        private float metricSum = 0;
+        private int dataGroup = 0;
+        private float prevAverage = 0;
+        private int slopeUp = 0;
+        private int slopeDown = 0;
 
         // used to track data for learning
         private int totalMyWorkers = 0;
@@ -232,11 +240,34 @@ namespace GameManager
             semiconstants[LEARN_MAX_REFINERIES] = maxRefineries;
         }
 
+        /// <summary>
+        /// computes the win margin for each round.
+        /// </summary>
+        /// <returns></returns>
         private int ComputeWinMetric()
         {
             return (this.mySoldiers.Count + this.myArchers.Count) - (this.enemySoldiers.Count + this.enemyArchers.Count);
         }
 
+        /// <summary>
+        /// returns the next index in the array. if at the end of the array, loops back to 0.
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        private int GetNextIndex(int[] array, int index)
+        {
+            if (index > array.Length - 1)
+            {
+                index = 0;
+            }
+            else
+            {
+                index++;
+            }
+
+            return array[index];
+        }
         #endregion
     
         /// <summary>
@@ -390,65 +421,82 @@ namespace GameManager
             Debug.Log("Nbr Wins: " + AgentNbrWins);
 
             // compute new numbers every x rounds
-            if () {
+            if (gatherData)
+            {
+                metricSum += ComputeWinMetric();
+                semiConstRoundCounter++;
 
-                if (semiConstRoundCounter < 3) {
-                    roundResults[semiConstRoundCounter] = ComputeWinMetric();
-
-                    if (semiConstRoundCounter == 0)
-                    {
-                        semiconstants[currSemiconstant] += 1;
-                    }
-                    else if (semiConstRoundCounter == 1)
-                    {
-                        semiconstants[currSemiconstant] -= 2;
-                    }
-                }
-                else
+                // if we have enough results...
+                if (semiConstRoundCounter >= dataPoints)
                 {
-                    // determine which way on the slope to learn
-                    int slopeUp = roundResults[1] - roundResults[0];
-                    int slopDown = roundResults[2] - roundResults[0];
-
-                    if (slopeUp > slopDown)
-                    {
-                        searchDirection = 1;
-                    }
-                    else
-                    {
-                        searchDirection = -1;
-                    }
-
-                    semiconstants[currSemiconstant] += searchDirection * 1;
+                    dataAverage = metricSum / dataPoints;
+                    metricSum = 0;
+                    gatherData = false;
+                    semiConstRoundCounter = 0;
                 }
-            }
-            // check to ensure all enemy units are destroyed
-            if (this.enemyArchers.Count + this.enemySoldiers.Count + this.enemyWorkers.Count + this.enemyBases.Count + this.enemyBarracks.Count + this.enemyRefineries.Count == 0)
-            {
-                win = true;
-            }
-
-            // if we won, keep on learning trajectory
-            if (win)
-            {
 
             }
 
-            // if we lost, switch trajectory
-            else
+            // if we have enough data, determine which way up/down the number scale to search, tweak semi-constants as necessary.
+            // if we have passed the local maximum, move on to the next semi-constant.
+            if (!gatherData)
             {
+                switch (dataGroup)
+                {
+                    case 0:
+                        dataAverage = metricSum / dataPoints;
+                        semiconstants[currSemiconstant]++;
+                        dataGroup = 1;
+                        break;
+                    case 1:
+                        slopeUp = roundResults[1] - roundResults[0];
+                        semiconstants[currSemiconstant] -= 2;
+                        dataGroup = 2;
+                        break;
+                    case 2:
+                        slopeDown = roundResults[2] - roundResults[0];
+                        dataGroup = 3;
+                        break;
+                    case 3:
+                        if (slopeUp > slopeDown)
+                        {
+                            searchDirection = 1;
+                        }
+                        else
+                        {
+                            searchDirection = -1;
+                        }
+                        dataGroup = 4;
+                        break;
+                    case 4:
+                        semiconstants[currSemiconstant] += (1 * searchDirection);
+                        dataGroup = 5;
+                        break;
+                    case 5:
+                        if (dataAverage > prevAverage)
+                        {
+                            semiconstants[currSemiconstant]--;
+                            currSemiconstant = GetNextIndex(semiconstants, currSemiconstant);
+                            prevAverage = dataAverage;
+                            dataGroup = 0;
+                        }
+                        break;
+                }
 
+                gatherData = true;
             }
 
             Debug.Log("Win: " + win.ToString());
 
+            Unpack();
+
             //Debug.Log("PlanningAgent::Learn");
-            Log("total my workers: " + totalMyWorkers.ToString());
-            Log("total my soldiers: " + totalMySoldiers.ToString());
-            Log("total my archers: " + totalMyArchers.ToString());
-            Log("total my bases: " + totalMyBases.ToString());
-            Log("total my barracks: " + totalMyBarracks.ToString());
-            Log("total my refineries: " + totalMyRefineries.ToString());
+            //Log("total my workers: " + totalMyWorkers.ToString());
+            //Log("total my soldiers: " + totalMySoldiers.ToString());
+            //Log("total my archers: " + totalMyArchers.ToString());
+            //Log("total my bases: " + totalMyBases.ToString());
+            //Log("total my barracks: " + totalMyBarracks.ToString());
+            //Log("total my refineries: " + totalMyRefineries.ToString());
             Log("max workers: " + LEARN_MAX_WORKERS.ToString());
             Log("min workers: " + LEARN_MIN_WORKERS.ToString());
             Log("max soldiers: " + LEARN_MAX_SOLDIERS.ToString());
@@ -476,6 +524,9 @@ namespace GameManager
         /// </summary>
         public override void InitializeRound()
         {
+
+            Pack();
+
             //Debug.Log("PlanningAgent::InitializeRound");
             buildPositions = new List<Vector3Int>();
 
@@ -613,7 +664,6 @@ namespace GameManager
                 if (shouldBuildBase == 1.0)
                 {
                     this.BuildBuilding(UnitType.BASE);
-                    ++this.totalMyBases;
                 }
 
                 // if we need barracks or refineries and have the appropriate dependency, build them
