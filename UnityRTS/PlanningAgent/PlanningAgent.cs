@@ -240,6 +240,19 @@ namespace GameManager
             semiconstants[LEARN_MAX_REFINERIES] = maxRefineries;
         }
 
+        private void RandomReset()
+        {
+            maxWorkers = UnityEngine.Random.Range(0, 100);
+            minWorkers = UnityEngine.Random.Range(0, 100);
+            maxArchers = UnityEngine.Random.Range(0, 100);
+            minArchers = UnityEngine.Random.Range(0, 100);
+            maxSoldiers = UnityEngine.Random.Range(0, 100);
+            minSoldiers = UnityEngine.Random.Range(0, 100);
+            maxBases = UnityEngine.Random.Range(0, 25);
+            maxBarracks = UnityEngine.Random.Range(0, 50);
+            maxRefineries = UnityEngine.Random.Range(0, 25);
+        }
+
         /// <summary>
         /// computes the win margin for each round.
         /// </summary>
@@ -260,6 +273,7 @@ namespace GameManager
             if (index > array.Length - 1)
             {
                 index = 0;
+                RandomReset();
             }
             else
             {
