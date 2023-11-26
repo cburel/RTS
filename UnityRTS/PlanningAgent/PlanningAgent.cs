@@ -685,12 +685,9 @@ namespace GameManager
                 }
 
                 float shouldBuildBase = Mathf.Clamp(maxBases - this.myBases.Count, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BASE], 0.0f, 1f);
-                Debug.Log("shouldBuildBase:" + shouldBuildBase.ToString());
                 float shouldBuildBarracks = Mathf.Clamp(maxBarracks - this.myBarracks.Count, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BARRACKS], 0.0f, 1f);
-                Debug.Log("shouldBuildBarracks:" + shouldBuildBarracks.ToString());
                 float shouldBuildRefinery = Mathf.Clamp(maxRefineries - this.myRefineries.Count, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.REFINERY], 0.0f, 1f);
-                Debug.Log("shouldBuildRefinery:" + shouldBuildRefinery.ToString());
-
+               
                 // if we have no base, build one
                 if (shouldBuildBase == 1.0)
                 {
@@ -760,14 +757,12 @@ namespace GameManager
                     if (trainArcher == 1.0)
                     {
                         this.Train(b, UnitType.ARCHER);
-                        ++this.totalMyArchers;
                     }
 
                     float trainSoldier = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(maxSoldiers - mySoldiers.Count, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.SOLDIER], 0.0f, 1f);
                     if (trainSoldier == 1.0)
                     {
                         this.Train(b, UnitType.SOLDIER);
-                        ++this.totalMySoldiers;
                     }
                 }
             }
@@ -781,7 +776,6 @@ namespace GameManager
                     if (trainWorker == 1.0)
                     {
                         this.Train(b, UnitType.WORKER);
-                        ++this.totalMyWorkers;
                     }
                 }
             }
