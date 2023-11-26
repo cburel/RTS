@@ -46,6 +46,7 @@ namespace GameManager
         private const int LEARN_MAX_BARRACKS = 8;
         private const int LEARN_MAX_REFINERIES = 9;
         private int[] semiconstants = new int[10];
+        private int[] semiconstantsMax = new int[10];
         private bool win = false;
         private int semiConstRoundCounter = 0;
         private int[] roundResults = new int[3];
@@ -243,6 +244,12 @@ namespace GameManager
             semiconstants[LEARN_MAX_BASES] = maxBases;
             semiconstants[LEARN_MAX_BARRACKS] = maxBarracks;
             semiconstants[LEARN_MAX_REFINERIES] = maxRefineries;
+
+            for (int i = 0; i < semiconstantsMax.Length - 1; ++i)
+            {
+                semiconstants[i] = 0;
+            }
+            semiconstantsMax[LEARN_MAX_BARRACKS] = 2; 
         }
 
         private void RandomReset()
@@ -493,16 +500,16 @@ namespace GameManager
                         dataGroup = 4;
                         break;
                     case 4:
-                        if (semiconstants[currSemiconstant] > 1 || searchDirection == 1)
-                        {
-                            semiconstants[currSemiconstant] += (1 * searchDirection);
-                            prevAverage = dataAverage;
-                            dataGroup = 5;
-                        }
-                        else
+                        if ((searchDirection == -1 && semiconstants[currSemiconstant] == 1) || (searchDirection == -1 && semiconstants[currSemiconstant] == semiconstantsMax[currSemiconstant]))
                         {
                             currSemiconstant = GetNextIndex(semiconstants, currSemiconstant);
                             dataGroup = 0;
+                        }
+                        else
+                        {
+                            prevAverage = dataAverage;
+                            semiconstants[currSemiconstant] += (1 * searchDirection);
+                            dataGroup = 5;
                         }
                         break;
                     case 5:

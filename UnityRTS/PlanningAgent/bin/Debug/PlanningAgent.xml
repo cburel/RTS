@@ -182,10 +182,5 @@
             </summary>
             <param name="newState"></param>
         </member>
-        <member name="M:GameManager.PlanningAgent.ResetLearningMetrics">
-            <summary>
-            resets data totals for learning
-            </summary>
-        </member>
     </members>
 </doc>
