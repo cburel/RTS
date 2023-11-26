@@ -32,7 +32,6 @@ namespace GameManager
         private int buildSoldierCounter = 0;
         private bool needArcher = false;
         private bool buildMoreBarracks = false;
-        private bool pauseBuildingBarracks = true;
 
         // used for learn method
         private const int LEARN_MIN_TROOPS = 0;
@@ -696,8 +695,9 @@ namespace GameManager
                 else if (shouldBuildBarracks == 1.0 && this.myBases.Count > 0) {
                     this.BuildBuilding(UnitType.BARRACKS);
                     if (this.myArchers.Count + this.mySoldiers.Count > (this.maxArchers + this.maxSoldiers / 2))
-                    {
+                    {                        
                         buildMoreBarracks = true;
+                        Debug.LogError("buildMoreBarracks " + buildMoreBarracks.ToString());
                     }
                     else if (this.myBarracks.Count >= this.maxBarracks)
                     {
@@ -760,7 +760,7 @@ namespace GameManager
                 if (!buildMoreBarracks || this.myBarracks.Count >= this.maxBarracks) {
                     if (mySoldiers.Count < minSoldiers || myArchers.Count < minArchers || myRefineries.Count > 0) {
                         float trainArcher = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(maxArchers - myArchers.Count, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.ARCHER], 0.0f, 1f);
-                        if (trainArcher == 1.0 && needArcher)
+                        if (trainArcher == 1.0 && (needArcher || this.mySoldiers.Count >= this.maxSoldiers))
                         {
                             this.Train(b, UnitType.ARCHER);
                             needArcher = false;
