@@ -29,6 +29,10 @@ namespace GameManager
         private int maxBases = 2;
         private int maxBarracks = 2;
         private int maxRefineries = 2;
+        private int buildSoldierCounter = 0;
+        private bool needArcher = false;
+        private bool buildMoreBarracks = false;
+        private bool pauseBuildingBarracks = true;
 
         // used for learn method
         private const int LEARN_MIN_TROOPS = 0;
@@ -55,15 +59,8 @@ namespace GameManager
         private float prevAverage = 0;
         private int slopeUp = 0;
         private int slopeDown = 0;
-
-        // used to track data for learning
-        private int totalMyWorkers = 0;
-        private int totalMySoldiers = 0;
-        private int totalMyArchers = 0;
-        private int totalMyBases = 0;
-        private int totalMyBarracks = 0;
-        private int totalMyRefineries = 0;
-
+        private int counterToReset = 0;
+        
         #region Private Data
 
         ///////////////////////////////////////////////////////////////////////
@@ -282,7 +279,11 @@ namespace GameManager
             if (index > array.Length - 1)
             {
                 index = 0;
-                RandomReset();
+                counterToReset++;
+                if (counterToReset >= 3) {
+                    RandomReset();
+                    counterToReset = 0;
+                }
             }
             else
             {
@@ -501,7 +502,6 @@ namespace GameManager
                         else
                         {
                             currSemiconstant = GetNextIndex(semiconstants, currSemiconstant);
-                            Debug.LogError("GetNextIndex called! Case 4");
                             dataGroup = 0;
                         }
                         break;
@@ -509,7 +509,6 @@ namespace GameManager
                         if (dataAverage < prevAverage)
                         {
                             semiconstants[currSemiconstant] -= (1 * searchDirection);
-                            Debug.LogError("GetNextIndex called! Case 5");
                             currSemiconstant = GetNextIndex(semiconstants, currSemiconstant);
                             dataGroup = 0;
                         }
@@ -524,12 +523,6 @@ namespace GameManager
             Unpack();
 
             //Debug.Log("PlanningAgent::Learn");
-            //Log("total my workers: " + totalMyWorkers.ToString());
-            //Log("total my soldiers: " + totalMySoldiers.ToString());
-            //Log("total my archers: " + totalMyArchers.ToString());
-            //Log("total my bases: " + totalMyBases.ToString());
-            //Log("total my barracks: " + totalMyBarracks.ToString());
-            //Log("total my refineries: " + totalMyRefineries.ToString());
             Log("min troops: " + minTroops.ToString());
             Log("max workers: " + maxWorkers.ToString());
             Log("min workers: " + minWorkers.ToString());
@@ -586,9 +579,6 @@ namespace GameManager
             enemyBases = new List<int>();
             enemyBarracks = new List<int>();
             enemyRefineries = new List<int>();
-
-            // reset learning metric totals
-            ResetLearningMetrics();
         }
 
         /// <summary>
@@ -695,13 +685,20 @@ namespace GameManager
                 }
 
                 // if we need barracks or refineries and have the appropriate dependency, build them
+                // work on this
                 else if (shouldBuildBarracks == 1.0 && this.myBases.Count > 0) {
                     this.BuildBuilding(UnitType.BARRACKS);
-                    ++this.totalMyBarracks;
+                    if (this.myArchers.Count + this.mySoldiers.Count > (this.maxArchers + this.maxSoldiers / 2))
+                    {
+                        buildMoreBarracks = true;
+                    }
+                    else if (this.myBarracks.Count >= this.maxBarracks)
+                    {
+                        buildMoreBarracks = false;
+                    }
                 }
                 else if (shouldBuildRefinery == 1.0 && this.myBarracks.Count > 0) {
                     this.BuildBuilding(UnitType.REFINERY);
-                    ++this.totalMyRefineries;
                 }
 
                 this.DoWork();
@@ -751,18 +748,29 @@ namespace GameManager
                 Unit b = GameManager.Instance.GetUnit(barrack);
 
                 // if we have at least one soldier, save gold to build refinery.
-                // if we have no soldiers, train one.
-                if (mySoldiers.Count < minSoldiers || myArchers.Count < minArchers || myRefineries.Count > 0) {
-                    float trainArcher = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(maxArchers - myArchers.Count, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.ARCHER], 0.0f, 1f);
-                    if (trainArcher == 1.0)
-                    {
-                        this.Train(b, UnitType.ARCHER);
-                    }
+                // if we have no soldiers, train one. if we have built two soldiers since we last built an archer, build another archer.
+                // if we have enough troops, save gold to build a second barracks.
+                if (!buildMoreBarracks || this.myBarracks.Count >= this.maxBarracks) {
+                    if (mySoldiers.Count < minSoldiers || myArchers.Count < minArchers || myRefineries.Count > 0) {
+                        float trainArcher = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(maxArchers - myArchers.Count, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.ARCHER], 0.0f, 1f);
+                        if (trainArcher == 1.0 && needArcher)
+                        {
+                            this.Train(b, UnitType.ARCHER);
+                            needArcher = false;
+                            buildSoldierCounter = 0;
+                        }
 
-                    float trainSoldier = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(maxSoldiers - mySoldiers.Count, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.SOLDIER], 0.0f, 1f);
-                    if (trainSoldier == 1.0)
-                    {
-                        this.Train(b, UnitType.SOLDIER);
+                        float trainSoldier = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(maxSoldiers - mySoldiers.Count, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.SOLDIER], 0.0f, 1f);
+                        if (trainSoldier == 1.0)
+                        {
+                            if (buildSoldierCounter < 3 && !needArcher) {
+                                this.Train(b, UnitType.SOLDIER);
+                                buildSoldierCounter++;
+                            }
+                            if (buildSoldierCounter >= 2) {
+                                needArcher = true;
+                            }
+                        }
                     }
                 }
             }
@@ -791,21 +799,6 @@ namespace GameManager
             Debug.Log("<color=green>Exiting State: </color>" + this.currentState.ToString());
             this.currentState = newState;
             Debug.Log("<color=green>Entering State: </color>" + this.currentState.ToString());
-        }
-
-
-        /// <summary>
-        /// resets data totals for learning
-        /// </summary>
-        private void ResetLearningMetrics()
-        {
-            // used to track data for learning
-            totalMyWorkers = 0;
-            totalMySoldiers = 0;
-            totalMyArchers = 0;
-            totalMyBases = 0;
-            totalMyBarracks = 0;
-            totalMyRefineries = 0;
         }
 
         #endregion
