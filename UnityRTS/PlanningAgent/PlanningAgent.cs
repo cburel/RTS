@@ -21,26 +21,27 @@ namespace GameManager
         private PlanningAgent.AgentState currentState;
         private int maxWorkers = 15;
         private int minWorkers = 5;
-        private int minTroops = 7;
+        private int minTroops = 2;
         private int maxArchers = 10;
         private int minArchers = 5;
         private int maxSoldiers = 10;
         private int minSoldiers = 5;
-        private int maxBases = 1;
+        private int maxBases = 2;
         private int maxBarracks = 2;
-        private int maxRefineries = 1;
+        private int maxRefineries = 2;
 
         // used for learn method
-        private const int LEARN_MAX_WORKERS = 0;
-        private const int LEARN_MIN_WORKERS = 1;
-        private const int LEARN_MAX_ARCHERS = 2;
-        private const int LEARN_MIN_ARCHERS = 3;
-        private const int LEARN_MAX_SOLDIERS = 4;
-        private const int LEARN_MIN_SOLDIERS = 5;
-        private const int LEARN_MAX_BASES = 6;
-        private const int LEARN_MAX_BARRACKS = 7;
-        private const int LEARN_MAX_REFINERIES = 8;
-        private int[] semiconstants = new int[9];
+        private const int LEARN_MIN_TROOPS = 0;
+        private const int LEARN_MAX_WORKERS = 1;
+        private const int LEARN_MIN_WORKERS = 2;
+        private const int LEARN_MAX_ARCHERS = 3;
+        private const int LEARN_MIN_ARCHERS = 4;
+        private const int LEARN_MAX_SOLDIERS = 5;
+        private const int LEARN_MIN_SOLDIERS = 6;
+        private const int LEARN_MAX_BASES = 7;
+        private const int LEARN_MAX_BARRACKS = 8;
+        private const int LEARN_MAX_REFINERIES = 9;
+        private int[] semiconstants = new int[10];
         private bool win = false;
         private int semiConstRoundCounter = 0;
         private int[] roundResults = new int[3];
@@ -169,6 +170,11 @@ namespace GameManager
 
         #region learning metrics
 
+        private int LearnMinTroops()
+        {
+            return semiconstants[LEARN_MIN_TROOPS];
+        }
+
         private int LearnMaxWorkers()
         {
             return semiconstants[LEARN_MAX_WORKERS];
@@ -216,6 +222,7 @@ namespace GameManager
 
         private void Unpack()
         {
+            minTroops = LearnMinTroops();
             maxWorkers = LearnMaxWorkers();
             minWorkers = LearnMinWorkers();
             maxArchers = LearnMaxArchers();
@@ -229,6 +236,7 @@ namespace GameManager
 
         private void Pack()
         {
+            semiconstants[LEARN_MIN_TROOPS] = minTroops;
             semiconstants[LEARN_MAX_WORKERS] = maxWorkers;
             semiconstants[LEARN_MIN_WORKERS] = minWorkers;
             semiconstants[LEARN_MAX_ARCHERS] = maxArchers;
@@ -242,6 +250,7 @@ namespace GameManager
 
         private void RandomReset()
         {
+            minTroops = UnityEngine.Random.Range(0, 100);
             maxWorkers = UnityEngine.Random.Range(0, 100);
             minWorkers = UnityEngine.Random.Range(0, 100);
             maxArchers = UnityEngine.Random.Range(0, 100);
@@ -280,7 +289,7 @@ namespace GameManager
                 index++;
             }
 
-            return array[index];
+            return index;
         }
         #endregion
     
@@ -364,7 +373,6 @@ namespace GameManager
                     Unit troopUnit = GameManager.Instance.GetUnit(troopNbr);
                     if (troopUnit.CurrentAction == UnitAction.IDLE)
                     {
-                        Debug.Log("<color=green>Attacking!</color>");
                         // If there are archers to attack
                         if (enemyArchers.Count > 0)
                         {
@@ -432,6 +440,7 @@ namespace GameManager
         /// </summary>
         public override void Learn()
         {
+            Log("round counter: " + semiConstRoundCounter.ToString());
             Debug.Log("Nbr Wins: " + AgentNbrWins);
 
             // compute new numbers every x rounds
@@ -483,15 +492,25 @@ namespace GameManager
                         dataGroup = 4;
                         break;
                     case 4:
-                        semiconstants[currSemiconstant] += (1 * searchDirection);
-                        dataGroup = 5;
+                        if (semiconstants[currSemiconstant] > 1 || searchDirection == 1)
+                        {
+                            semiconstants[currSemiconstant] += (1 * searchDirection);
+                            prevAverage = dataAverage;
+                            dataGroup = 5;
+                        }
+                        else
+                        {
+                            currSemiconstant = GetNextIndex(semiconstants, currSemiconstant);
+                            Debug.LogError("GetNextIndex called! Case 4");
+                            dataGroup = 0;
+                        }
                         break;
                     case 5:
-                        if (dataAverage > prevAverage)
+                        if (dataAverage < prevAverage)
                         {
-                            semiconstants[currSemiconstant]--;
+                            semiconstants[currSemiconstant] -= (1 * searchDirection);
+                            Debug.LogError("GetNextIndex called! Case 5");
                             currSemiconstant = GetNextIndex(semiconstants, currSemiconstant);
-                            prevAverage = dataAverage;
                             dataGroup = 0;
                         }
                         break;
@@ -511,15 +530,16 @@ namespace GameManager
             //Log("total my bases: " + totalMyBases.ToString());
             //Log("total my barracks: " + totalMyBarracks.ToString());
             //Log("total my refineries: " + totalMyRefineries.ToString());
-            Log("max workers: " + LEARN_MAX_WORKERS.ToString());
-            Log("min workers: " + LEARN_MIN_WORKERS.ToString());
-            Log("max soldiers: " + LEARN_MAX_SOLDIERS.ToString());
-            Log("min soldiers: " + LEARN_MIN_SOLDIERS.ToString());
-            Log("max archers: " + LEARN_MAX_ARCHERS.ToString());
-            Log("min archers: " + LEARN_MIN_ARCHERS.ToString());
-            Log("max bases: " + LEARN_MAX_BASES.ToString());
-            Log("max barracks: " + LEARN_MAX_BARRACKS.ToString());
-            Log("max refineries: " + LEARN_MAX_REFINERIES.ToString());
+            Log("min troops: " + minTroops.ToString());
+            Log("max workers: " + maxWorkers.ToString());
+            Log("min workers: " + minWorkers.ToString());
+            Log("max soldiers: " + maxSoldiers.ToString());
+            Log("min soldiers: " + minSoldiers.ToString());
+            Log("max archers: " + maxArchers.ToString());
+            Log("min archers: " + minArchers.ToString());
+            Log("max bases: " + maxBases.ToString());
+            Log("max barracks: " + maxBarracks.ToString());
+            Log("max refineries: " + maxRefineries.ToString());
         }
 
         /// <summary>
@@ -609,15 +629,12 @@ namespace GameManager
         public override void Update()
         {
             UpdateGameState();
-            Debug.Log("<color=green>Current State:</color> " + this.currentState.ToString());
             
             // state machine //
             int troopsCount = this.mySoldiers.Count + this.myArchers.Count;
             int structureCount = this.myBases.Count + this.myBarracks.Count + this.myRefineries.Count;
             float shouldAttack = Mathf.Clamp(structureCount - 1, 0, 1) * Mathf.Clamp(troopsCount - minTroops, 0, 1);
-            Debug.Log("shouldAttack: " + shouldAttack.ToString());
             float shouldBuildArmy = Mathf.Clamp(structureCount - 3, 0, 1) * Mathf.Clamp(minTroops - troopsCount, 0, 1);
-            Debug.Log("shouldBuildArmy: " + shouldBuildArmy.ToString());
 
             if (this.myBases.Count == 0 && this.currentState != PlanningAgent.AgentState.BUILDING_BASE)
             {
@@ -695,6 +712,8 @@ namespace GameManager
 
             if (this.currentState == PlanningAgent.AgentState.BUILDING_ARMY)
             {
+                AttackEnemy(mySoldiers);
+                AttackEnemy(myArchers);
                 this.DoWork();
             }
 
@@ -738,7 +757,6 @@ namespace GameManager
                 // if we have no soldiers, train one.
                 if (mySoldiers.Count < minSoldiers || myArchers.Count < minArchers || myRefineries.Count > 0) {
                     float trainArcher = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(maxArchers - myArchers.Count, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.ARCHER], 0.0f, 1f);
-                    Debug.Log("trainArcher:" + trainArcher.ToString() + ", <color=red>numArchers: </color>" + myArchers.Count.ToString());
                     if (trainArcher == 1.0)
                     {
                         this.Train(b, UnitType.ARCHER);
@@ -746,7 +764,6 @@ namespace GameManager
                     }
 
                     float trainSoldier = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(maxSoldiers - mySoldiers.Count, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.SOLDIER], 0.0f, 1f);
-                    Debug.Log("trainSoldier:" + trainSoldier.ToString());
                     if (trainSoldier == 1.0)
                     {
                         this.Train(b, UnitType.SOLDIER);
@@ -761,7 +778,6 @@ namespace GameManager
                 if (myWorkers.Count < minWorkers || (mySoldiers.Count >= maxSoldiers && myArchers.Count >= maxArchers)) {
                     Unit b = GameManager.Instance.GetUnit(myBase);
                     float trainWorker = (!b.Equals(null) ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.WORKER], 0.0f, 1f) * Mathf.Clamp(maxWorkers - myWorkers.Count, 0, 1);
-                    Debug.Log("trainWorker:" + trainWorker.ToString());
                     if (trainWorker == 1.0)
                     {
                         this.Train(b, UnitType.WORKER);
