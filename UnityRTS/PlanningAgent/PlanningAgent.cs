@@ -439,6 +439,81 @@ namespace GameManager
         }
         #endregion
 
+        #region helper functions
+
+        /// <summary>
+        /// sets the main mine
+        /// </summary>
+        private void SetMainMine()
+        {
+            // if mines exist
+            if (mines.Count > 0)
+            {
+                // if we have no main mine
+                if (this.mainMineNbr == -1)
+                {
+                    // find mine with health, set it as main mine
+                    for (int i = 0; i < this.mines.Count; ++i)
+                    {
+                        if (GameManager.Instance.GetUnit(this.mines[i]).Health > 0)
+                        {
+                            this.mainMineNbr = this.mines[i];
+                        }
+                    }
+                }
+            }
+
+            // otherwise, no mines exist
+            else
+            {
+                mainMineNbr = -1;
+            }
+        }
+
+       /// <summary>
+       /// determines whether to build a base
+       /// </summary>
+       /// <returns></returns>
+       private bool ShouldBuildBaseFunc()
+        {
+            if (this.myBases.Count < this.maxBases && this.Gold >= Constants.COST[UnitType.BASE])
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// determines whether to build a barracks
+        /// </summary>
+        /// <returns></returns>
+        private bool ShouldBuildBarracksFunc()
+        {
+            if (this.myBarracks.Count < this.maxBarracks && this.Gold >= Constants.COST[UnitType.BARRACKS] && this.myBases.Count > 0)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// determines whether to build a refinery
+        /// </summary>
+        /// <returns></returns>
+        private bool ShouldBuildRefineryFunc()
+        {
+            if (this.myRefineries.Count < this.maxRefineries && this.Gold >= Constants.COST[UnitType.REFINERY])
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion
+
         #region Public Methods
 
         /// <summary>
@@ -650,49 +725,24 @@ namespace GameManager
 
             if (this.currentState == PlanningAgent.AgentState.BUILDING_BASE)
             {
-                // if mines exist
-                if (mines.Count > 0)
-                {
-                    // if we have no main mine
-                    if (this.mainMineNbr == -1)
-                    {
-                        // find mine with health, set it as main mine
-                        for (int i = 0; i < this.mines.Count; ++i)
-                        {
-                            if (GameManager.Instance.GetUnit(this.mines[i]).Health > 0)
-                            {
-                                this.mainMineNbr = this.mines[i];
-                            }
-                        }
-                    }
-                }
+                SetMainMine();
+                
+                // if we have a base, assume the first is our main.
+                mainBaseNbr = myBases.Count > 0 ? myBases[0] : -1;
 
-                // otherwise, no mines exist
-                else
-                {
-                    mainMineNbr = -1;
-                }
-
-                // if we have a base
-                if (myBases.Count > 0)
-                {
-                    // assume the first base is our main base
-                    mainBaseNbr = myBases[0];
-                }
-
-                float shouldBuildBase = Mathf.Clamp(maxBases - this.myBases.Count, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BASE], 0.0f, 1f);
-                float shouldBuildBarracks = Mathf.Clamp(maxBarracks - this.myBarracks.Count, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BARRACKS], 0.0f, 1f);
-                float shouldBuildRefinery = Mathf.Clamp(maxRefineries - this.myRefineries.Count, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.REFINERY], 0.0f, 1f);
+                //float shouldBuildBase = Mathf.Clamp(maxBases - this.myBases.Count, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BASE], 0.0f, 1f);
+                //float shouldBuildBarracks = Mathf.Clamp(maxBarracks - this.myBarracks.Count, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BARRACKS], 0.0f, 1f);
+                //float shouldBuildRefinery = Mathf.Clamp(maxRefineries - this.myRefineries.Count, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.REFINERY], 0.0f, 1f);
                
                 // if we have no base, build one
-                if (shouldBuildBase == 1.0)
+                if (ShouldBuildBaseFunc())
                 {
                     this.BuildBuilding(UnitType.BASE);
                 }
 
                 // if we need barracks or refineries and have the appropriate dependency, build them
                 // work on this
-                else if (shouldBuildBarracks == 1.0 && this.myBases.Count > 0) {
+                else if (ShouldBuildBarracksFunc()) {
                     this.BuildBuilding(UnitType.BARRACKS);
                     if (this.myArchers.Count + this.mySoldiers.Count > (this.maxArchers + this.maxSoldiers / 2))
                     {                        
@@ -704,7 +754,7 @@ namespace GameManager
                         buildMoreBarracks = false;
                     }
                 }
-                else if (shouldBuildRefinery == 1.0 && this.myBarracks.Count > 0) {
+                else if (ShouldBuildRefineryFunc()) {
                     this.BuildBuilding(UnitType.REFINERY);
                 }
 
@@ -713,8 +763,6 @@ namespace GameManager
 
             if (this.currentState == PlanningAgent.AgentState.BUILDING_ARMY)
             {
-                AttackEnemy(mySoldiers);
-                AttackEnemy(myArchers);
                 this.DoWork();
             }
 
