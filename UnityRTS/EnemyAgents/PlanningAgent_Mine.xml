@@ -142,6 +142,59 @@
             </summary>
             <param name="myTroops"></param>
         </member>
+        <member name="M:GameManager.PlanningAgent.SetMainMine">
+            <summary>
+            sets the main mine
+            </summary>
+        </member>
+        <member name="M:GameManager.PlanningAgent.ShouldBuildBaseFunc">
+            <summary>
+            determines whether to build a base
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GameManager.PlanningAgent.ShouldBuildBarracksFunc">
+            <summary>
+            determines whether to build a barracks
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GameManager.PlanningAgent.ShouldBuildRefineryFunc">
+            <summary>
+            determines whether to build a refinery
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GameManager.PlanningAgent.ShouldBuildWorkerFunc">
+            <summary>
+            determines whether to build a worker
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GameManager.PlanningAgent.ShouldBuildSoldierFunc">
+            <summary>
+            determines whether to build a soldier
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GameManager.PlanningAgent.ShouldBuildArcherFunc">
+            <summary>
+            determines whether to build an archer
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GameManager.PlanningAgent.WaitingToBuildBarracks">
+            <summary>
+            determines whether we are waiting to build another barracks
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GameManager.PlanningAgent.ShouldAttackFunc">
+            <summary>
+             determines whether to attack the enemy
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:GameManager.PlanningAgent.Learn">
             <summary>
             Called at the end of each round before remaining units are

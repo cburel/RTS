@@ -30,7 +30,6 @@ namespace GameManager
         private int maxBarracks = 2;
         private int maxRefineries = 2;
         private int buildSoldierCounter = 0;
-        private bool needArcher = false;
         private bool buildMoreBarracks = false;
 
         // used for learn method
@@ -464,6 +463,7 @@ namespace GameManager
                         if (GameManager.Instance.GetUnit(this.mines[i]).Health > 0)
                         {
                             this.mainMineNbr = this.mines[i];
+                            break;
                         }
                     }
                 }
@@ -482,12 +482,7 @@ namespace GameManager
        /// <returns></returns>
        private bool ShouldBuildBaseFunc()
         {
-            if (this.myBases.Count < this.maxBases && this.Gold >= Constants.COST[UnitType.BASE])
-            {
-                return true;
-            }
-
-            return false;
+            return (this.myBases.Count < this.maxBases && this.Gold >= Constants.COST[UnitType.BASE]);
         }
 
         /// <summary>
@@ -496,12 +491,7 @@ namespace GameManager
         /// <returns></returns>
         private bool ShouldBuildBarracksFunc()
         {
-            if (this.myBarracks.Count < this.maxBarracks && this.Gold >= Constants.COST[UnitType.BARRACKS] && this.myBases.Count > 0)
-            {
-                return true;
-            }
-
-            return false;
+            return (this.myBarracks.Count < this.maxBarracks && this.myBases.Count > 0 && this.Gold >= Constants.COST[UnitType.BARRACKS]);
         }
 
         /// <summary>
@@ -510,12 +500,7 @@ namespace GameManager
         /// <returns></returns>
         private bool ShouldBuildRefineryFunc()
         {
-            if (this.myRefineries.Count < this.maxRefineries && this.Gold >= Constants.COST[UnitType.REFINERY])
-            {
-                return true;
-            }
-
-            return false;
+            return (this.myRefineries.Count < this.maxRefineries && this.Gold >= Constants.COST[UnitType.REFINERY]);
         }
 
         /// <summary>
@@ -524,12 +509,7 @@ namespace GameManager
         /// <returns></returns>
         private bool ShouldBuildWorkerFunc()
         {
-            if (this.myWorkers.Count < this.maxWorkers && this.Gold >= Constants.COST[UnitType.WORKER])
-            {
-                return true;
-            }
-
-            return false;
+            return (this.myWorkers.Count < this.minWorkers || (myArchers.Count + mySoldiers.Count) > (maxArchers + maxSoldiers) / 2);
         }
 
         /// <summary>
@@ -538,12 +518,7 @@ namespace GameManager
         /// <returns></returns>
         private bool ShouldBuildSoldierFunc()
         {
-            if (this.mySoldiers.Count < this.maxSoldiers && this.Gold >= Constants.COST[UnitType.SOLDIER])
-            {
-                return true;
-            }
-
-            return false;
+            return (this.mySoldiers.Count < this.maxSoldiers && this.buildSoldierCounter < 3);
         }
 
         /// <summary>
@@ -552,12 +527,7 @@ namespace GameManager
         /// <returns></returns>
         private bool ShouldBuildArcherFunc()
         {
-            if (this.myArchers.Count < this.maxArchers && this.Gold >= Constants.COST[UnitType.ARCHER])
-            {
-                return true;
-            }
-
-            return false;
+            return (this.myArchers.Count < this.maxArchers);
         }
 
         /// <summary>
@@ -566,7 +536,16 @@ namespace GameManager
         /// <returns></returns>
         private bool WaitingToBuildBarracks()
         {
+            return (myBarracks.Count < maxBarracks && (this.myArchers.Count + this.mySoldiers.Count) > (this.myArchers.Count + this.mySoldiers.Count) / 2);
+        }
 
+        /// <summary>
+        ///  determines whether to attack the enemy
+        /// </summary>
+        /// <returns></returns>
+        private bool ShouldAttackFunc()
+        {
+            return (this.mySoldiers.Count + this.myArchers.Count >= this.minTroops);
         }
 
         #endregion
@@ -757,7 +736,10 @@ namespace GameManager
         public override void Update()
         {
             UpdateGameState();
-            
+
+            // if we have a base, assume the first is our main.
+            mainBaseNbr = myBases.Count > 0 ? myBases[0] : -1;
+
             // state machine //
             int troopsCount = this.mySoldiers.Count + this.myArchers.Count;
             int structureCount = this.myBases.Count + this.myBarracks.Count + this.myRefineries.Count;
@@ -793,10 +775,6 @@ namespace GameManager
             {
                 this.UpdateState(PlanningAgent.AgentState.BUILDING_ARCHER);
             }
-            else if (shouldBuildArmy == 1.0)
-            {
-                this.UpdateState(PlanningAgent.AgentState.BUILDING_ARMY);
-            }
             else if (shouldAttack == 1.0)
             {
                 this.UpdateState(PlanningAgent.AgentState.WINNING);
@@ -807,14 +785,7 @@ namespace GameManager
             if (this.currentState == PlanningAgent.AgentState.BUILDING_BASE)
             {
                 SetMainMine();
-                
-                // if we have a base, assume the first is our main.
-                mainBaseNbr = myBases.Count > 0 ? myBases[0] : -1;
 
-                //float shouldBuildBase = Mathf.Clamp(maxBases - this.myBases.Count, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BASE], 0.0f, 1f);
-                //float shouldBuildBarracks = Mathf.Clamp(maxBarracks - this.myBarracks.Count, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.BARRACKS], 0.0f, 1f);
-                //float shouldBuildRefinery = Mathf.Clamp(maxRefineries - this.myRefineries.Count, 0, 1) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.REFINERY], 0.0f, 1f);
-               
                 // if we have no base, build one
                 if (ShouldBuildBaseFunc())
                 {
@@ -853,47 +824,55 @@ namespace GameManager
 
             if (this.currentState == PlanningAgent.AgentState.BUILDING_REFINERY)
             {
-                
-                if (ShouldBuildRefineryFunc())
-                {
-                    this.BuildBuilding(UnitType.REFINERY);
-                }
+                this.BuildBuilding(UnitType.REFINERY);
 
                 DoWork();
             }
 
-
             if (this.currentState == PlanningAgent.AgentState.BUILDING_WORKER)
             {
+                // set bases to train workers
+                foreach (int myBase in this.myBases)
+                {
+                    Unit b = GameManager.Instance.GetUnit(myBase);
+                    this.Train(b, UnitType.WORKER);
+                }
+
                 this.DoWork();
             }
-
 
             if (this.currentState == PlanningAgent.AgentState.BUILDING_SOLDIER)
             {
+                foreach (int barrack in this.myBarracks)
+                {
+                    Unit b = GameManager.Instance.GetUnit(barrack);
+                    this.Train(b, UnitType.SOLDIER);
+                    buildSoldierCounter++;
+                }
+
                 this.DoWork();
             }
-
-
+            
             if (this.currentState == PlanningAgent.AgentState.BUILDING_ARCHER)
             {
+
+                foreach (int barrack in this.myBarracks)
+                {
+                    Unit b = GameManager.Instance.GetUnit(barrack);
+                    this.Train(b, UnitType.ARCHER);
+                    buildSoldierCounter = 0;
+                }
+
                 this.DoWork();
             }
-
-
-            if (this.currentState == PlanningAgent.AgentState.BUILDING_ARMY)
-            {
-                this.DoWork();
-            }
-
-
+                        
             if (this.currentState == PlanningAgent.AgentState.WINNING)
             {
                 AttackEnemy(mySoldiers);
                 AttackEnemy(myArchers);
                 this.DoWork();
             }
-
+            
         }
 
         /// <summary>
@@ -915,54 +894,7 @@ namespace GameManager
                         this.Gather(w, m, b);
                     }
                 }
-            }
-
-            // set soldiers and archers to train
-            foreach (int barrack in this.myBarracks)
-            {
-                Unit b = GameManager.Instance.GetUnit(barrack);
-
-                // if we have at least one soldier, save gold to build refinery.
-                // if we have no soldiers, train one. if we have built two soldiers since we last built an archer, build another archer.
-                // if we have enough troops, save gold to build a second barracks.
-                if (!buildMoreBarracks || this.myBarracks.Count >= this.maxBarracks) {
-                    if (mySoldiers.Count < minSoldiers || myArchers.Count < minArchers || myRefineries.Count > 0) {
-                        float trainArcher = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(maxArchers - myArchers.Count, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.ARCHER], 0.0f, 1f);
-                        if (trainArcher == 1.0 && (needArcher || this.mySoldiers.Count >= this.maxSoldiers))
-                        {
-                            this.Train(b, UnitType.ARCHER);
-                            needArcher = false;
-                            buildSoldierCounter = 0;
-                        }
-
-                        float trainSoldier = (!b.Equals(null) ? 1 : 0) * (b.IsBuilt ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * (Mathf.Clamp(maxSoldiers - mySoldiers.Count, 0, 1)) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.SOLDIER], 0.0f, 1f);
-                        if (trainSoldier == 1.0)
-                        {
-                            if (buildSoldierCounter < 3 && !needArcher) {
-                                this.Train(b, UnitType.SOLDIER);
-                                buildSoldierCounter++;
-                            }
-                            if (buildSoldierCounter >= 2) {
-                                needArcher = true;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // set bases to train workers
-            foreach (int myBase in this.myBases)
-            {
-                if (myWorkers.Count < minWorkers || (mySoldiers.Count >= maxSoldiers && myArchers.Count >= maxArchers)) {
-                    Unit b = GameManager.Instance.GetUnit(myBase);
-                    float trainWorker = (!b.Equals(null) ? 1 : 0) * (b.CurrentAction == UnitAction.IDLE ? 1 : 0) * Mathf.Clamp((float)this.Gold - Constants.COST[UnitType.WORKER], 0.0f, 1f) * Mathf.Clamp(maxWorkers - myWorkers.Count, 0, 1);
-                    if (trainWorker == 1.0)
-                    {
-                        this.Train(b, UnitType.WORKER);
-                    }
-                }
-            }
-
+            }           
         }
 
         /// <summary>
