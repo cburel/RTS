@@ -74,6 +74,12 @@ namespace GameManager
         private enum AgentState
         {
             BUILDING_BASE,
+            BUILDING_BARRACKS,
+            WAITING,
+            BUILDING_REFINERY,
+            BUILDING_WORKER,
+            BUILDING_SOLDIER,
+            BUILDING_ARCHER,
             BUILDING_ARMY,
             WINNING,
             DEFENDING,
@@ -512,6 +518,57 @@ namespace GameManager
             return false;
         }
 
+        /// <summary>
+        /// determines whether to build a worker
+        /// </summary>
+        /// <returns></returns>
+        private bool ShouldBuildWorkerFunc()
+        {
+            if (this.myWorkers.Count < this.maxWorkers && this.Gold >= Constants.COST[UnitType.WORKER])
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// determines whether to build a soldier
+        /// </summary>
+        /// <returns></returns>
+        private bool ShouldBuildSoldierFunc()
+        {
+            if (this.mySoldiers.Count < this.maxSoldiers && this.Gold >= Constants.COST[UnitType.SOLDIER])
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// determines whether to build an archer
+        /// </summary>
+        /// <returns></returns>
+        private bool ShouldBuildArcherFunc()
+        {
+            if (this.myArchers.Count < this.maxArchers && this.Gold >= Constants.COST[UnitType.ARCHER])
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// determines whether we are waiting to build another barracks
+        /// </summary>
+        /// <returns></returns>
+        private bool WaitingToBuildBarracks()
+        {
+
+        }
+
         #endregion
 
         #region Public Methods
@@ -712,6 +769,30 @@ namespace GameManager
                 this.mainBaseNbr = -1;
                 this.UpdateState(PlanningAgent.AgentState.BUILDING_BASE);
             }
+            else if (ShouldBuildBarracksFunc())
+            {
+                this.UpdateState(PlanningAgent.AgentState.BUILDING_BARRACKS);
+            }
+            else if (WaitingToBuildBarracks())
+            {
+                this.UpdateState(PlanningAgent.AgentState.WAITING);
+            }
+            else if (ShouldBuildRefineryFunc())
+            {
+                this.UpdateState(PlanningAgent.AgentState.BUILDING_REFINERY);
+            }
+            else if (ShouldBuildWorkerFunc())
+            {
+                this.UpdateState(PlanningAgent.AgentState.BUILDING_WORKER);
+            }
+            else if (ShouldBuildSoldierFunc())
+            {
+                this.UpdateState(PlanningAgent.AgentState.BUILDING_SOLDIER);
+            }
+            else if (ShouldBuildArcherFunc())
+            {
+                this.UpdateState(PlanningAgent.AgentState.BUILDING_ARCHER);
+            }
             else if (shouldBuildArmy == 1.0)
             {
                 this.UpdateState(PlanningAgent.AgentState.BUILDING_ARMY);
@@ -739,13 +820,19 @@ namespace GameManager
                 {
                     this.BuildBuilding(UnitType.BASE);
                 }
+                this.DoWork();
+            }
+
+            if (this.currentState == PlanningAgent.AgentState.BUILDING_BARRACKS)
+            {               
 
                 // if we need barracks or refineries and have the appropriate dependency, build them
                 // work on this
-                else if (ShouldBuildBarracksFunc()) {
+                if (ShouldBuildBarracksFunc())
+                {
                     this.BuildBuilding(UnitType.BARRACKS);
                     if (this.myArchers.Count + this.mySoldiers.Count > (this.maxArchers + this.maxSoldiers / 2))
-                    {                        
+                    {
                         buildMoreBarracks = true;
                         Debug.LogError("buildMoreBarracks " + buildMoreBarracks.ToString());
                     }
@@ -754,12 +841,45 @@ namespace GameManager
                         buildMoreBarracks = false;
                     }
                 }
-                else if (ShouldBuildRefineryFunc()) {
+
+                DoWork();
+
+            }
+
+            if (this.currentState == PlanningAgent.AgentState.WAITING)
+            {
+                DoWork();
+            }
+
+            if (this.currentState == PlanningAgent.AgentState.BUILDING_REFINERY)
+            {
+                
+                if (ShouldBuildRefineryFunc())
+                {
                     this.BuildBuilding(UnitType.REFINERY);
                 }
 
+                DoWork();
+            }
+
+
+            if (this.currentState == PlanningAgent.AgentState.BUILDING_WORKER)
+            {
                 this.DoWork();
             }
+
+
+            if (this.currentState == PlanningAgent.AgentState.BUILDING_SOLDIER)
+            {
+                this.DoWork();
+            }
+
+
+            if (this.currentState == PlanningAgent.AgentState.BUILDING_ARCHER)
+            {
+                this.DoWork();
+            }
+
 
             if (this.currentState == PlanningAgent.AgentState.BUILDING_ARMY)
             {
