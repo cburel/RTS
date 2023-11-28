@@ -258,16 +258,17 @@ namespace GameManager
 
         private void RandomReset()
         {
-            minTroops = UnityEngine.Random.Range(0, 100);
-            maxWorkers = UnityEngine.Random.Range(0, 100);
-            minWorkers = UnityEngine.Random.Range(0, 100);
-            maxArchers = UnityEngine.Random.Range(0, 100);
-            minArchers = UnityEngine.Random.Range(0, 100);
-            maxSoldiers = UnityEngine.Random.Range(0, 100);
-            minSoldiers = UnityEngine.Random.Range(0, 100);
-            maxBases = UnityEngine.Random.Range(0, 25);
-            maxBarracks = UnityEngine.Random.Range(0, 50);
-            maxRefineries = UnityEngine.Random.Range(0, 25);
+            Log("Random Reset!");
+            minTroops = UnityEngine.Random.Range(2, 25);
+            maxWorkers = UnityEngine.Random.Range(2, 50);
+            minWorkers = UnityEngine.Random.Range(2, 25);
+            maxArchers = UnityEngine.Random.Range(2, 50);
+            minArchers = UnityEngine.Random.Range(2, 25);
+            maxSoldiers = UnityEngine.Random.Range(2, 50);
+            minSoldiers = UnityEngine.Random.Range(2, 25);
+            maxBases = UnityEngine.Random.Range(2, 4);
+            maxBarracks = UnityEngine.Random.Range(2, 8);
+            maxRefineries = UnityEngine.Random.Range(2, 4);
         }
 
         /// <summary>
