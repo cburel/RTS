@@ -251,7 +251,7 @@ namespace GameManager
 
             for (int i = 0; i < semiconstantsMax.Length - 1; ++i)
             {
-                semiconstants[i] = 0;
+                semiconstantsMax[i] = 0;
             }
             semiconstantsMax[LEARN_MAX_BARRACKS] = 2; 
         }
@@ -467,20 +467,16 @@ namespace GameManager
             // if mines exist
             if (mines.Count > 0)
             {
-                // if we have no main mine
-                if (this.mainMineNbr == -1)
+                // find mine with health, set it as main mine
+                for (int i = 0; i < this.mines.Count; ++i)
                 {
-                    // find mine with health, set it as main mine
-                    for (int i = 0; i < this.mines.Count; ++i)
+                    if (GameManager.Instance.GetUnit(this.mines[i]).Health > 0)
                     {
-                        if (GameManager.Instance.GetUnit(this.mines[i]).Health > 0)
-                        {
-                            this.mainMineNbr = this.mines[i];
-                            break;
-                        }
+                        this.mainMineNbr = this.mines[i];
+                        break;
                     }
                 }
-            }
+            }            
 
             // otherwise, no mines exist
             else
@@ -756,6 +752,9 @@ namespace GameManager
             // if we have a base, assume the first is our main.
             mainBaseNbr = myBases.Count > 0 ? myBases[0] : -1;
 
+            // set mine to gather from
+            SetMainMine();
+
             // state machine //
             int troopsCount = this.mySoldiers.Count + this.myArchers.Count;
             int structureCount = this.myBases.Count + this.myBarracks.Count + this.myRefineries.Count;
@@ -800,8 +799,6 @@ namespace GameManager
 
             if (this.currentState == PlanningAgent.AgentState.BUILDING_BASE)
             {
-                SetMainMine();
-
                 // if we have no base, build one
                 if (ShouldBuildBaseFunc())
                 {
@@ -887,8 +884,9 @@ namespace GameManager
             foreach (int worker in myWorkers)
             {
                 Unit w = GameManager.Instance.GetUnit(worker);
-                float shouldGather = (!(w == null) ? 1 : 0) * (w.CurrentAction == UnitAction.IDLE ? 1 : 0) * Mathf.Clamp(this.mainBaseNbr + 1, 0, 1) * Mathf.Clamp(this.mainMineNbr + 1, 0, 1);
-                if (shouldGather == 1.0)
+                //float shouldGather = (!(w == null) ? 1 : 0) * (w.CurrentAction == UnitAction.IDLE ? 1 : 0) * Mathf.Clamp(this.mainBaseNbr + 1, 0, 1) * Mathf.Clamp(this.mainMineNbr + 1, 0, 1);
+                bool shouldGather = !(w == null) && w.CurrentAction == UnitAction.IDLE && this.myBases.Count > 0 && this.mines.Count > 0;
+                if (shouldGather)
                 {
                     Unit m = GameManager.Instance.GetUnit(this.mainMineNbr);
                     Unit b = GameManager.Instance.GetUnit(this.mainBaseNbr);
