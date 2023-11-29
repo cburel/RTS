@@ -358,15 +358,27 @@ namespace GameManager
                 {
                     // Find the closest build position to this worker's position (DUMB) and 
                     // build the base there
+                    int counter = 0;
+                    int minDistanceCounter = 0;
+                    int minDistance = int.MaxValue;
+
                     foreach (Vector3Int toBuild in buildPositions)
                     {
+
                         if (GameManager.Instance.IsBoundedAreaBuildable(unitType, toBuild))
                         {
-                            Debug.Log("<color=green>Building!</color>");
-                            Build(unit, toBuild, unitType);
-                            return;
+                            int distance = (int)Mathf.Pow((toBuild.x - unit.GridPosition.x), 2) + (int)Mathf.Pow((toBuild.y - unit.GridPosition.y), 2);
+                            if (distance < minDistance)
+                            {
+                                minDistance = distance;
+                                minDistanceCounter = counter;
+                            }
                         }
+                        counter++;
                     }
+
+                    Build(unit, buildPositions[minDistanceCounter], unitType);
+                    return;
                 }
             }
         }
@@ -510,7 +522,7 @@ namespace GameManager
         /// <returns></returns>
         private bool ShouldBuildWorkerFunc()
         {
-            return (this.myWorkers.Count < this.minWorkers || (myArchers.Count + mySoldiers.Count) > (maxArchers + maxSoldiers) / 2);
+            return (this.myWorkers.Count < this.minWorkers || (myArchers.Count + mySoldiers.Count) >= (maxArchers + maxSoldiers));
         }
 
         /// <summary>
@@ -519,7 +531,7 @@ namespace GameManager
         /// <returns></returns>
         private bool ShouldBuildSoldierFunc()
         {
-            return (this.mySoldiers.Count < this.maxSoldiers && this.buildSoldierCounter < 3);
+            return (this.mySoldiers.Count < this.maxSoldiers && this.Gold >= Constants.COST[UnitType.SOLDIER] && this.buildSoldierCounter < 3);
         }
 
         /// <summary>
@@ -528,7 +540,7 @@ namespace GameManager
         /// <returns></returns>
         private bool ShouldBuildArcherFunc()
         {
-            return (this.myArchers.Count < this.maxArchers);
+            return (this.myArchers.Count < this.maxArchers && this.Gold >= Constants.COST[UnitType.ARCHER]);
         }
 
         /// <summary>
@@ -537,7 +549,7 @@ namespace GameManager
         /// <returns></returns>
         private bool WaitingToBuildBarracks()
         {
-            return (myBarracks.Count < maxBarracks && (this.myArchers.Count + this.mySoldiers.Count) > (this.myArchers.Count + this.mySoldiers.Count) / 2);
+            return (myBarracks.Count < maxBarracks && (this.myArchers.Count + this.mySoldiers.Count) > (this.maxArchers + this.maxSoldiers) / 2);
         }
 
         /// <summary>
@@ -672,6 +684,9 @@ namespace GameManager
 
             Pack();
 
+            //reset soldier count
+            buildSoldierCounter = 0;
+
             //Debug.Log("PlanningAgent::InitializeRound");
             buildPositions = new List<Vector3Int>();
 
@@ -744,9 +759,9 @@ namespace GameManager
             // state machine //
             int troopsCount = this.mySoldiers.Count + this.myArchers.Count;
             int structureCount = this.myBases.Count + this.myBarracks.Count + this.myRefineries.Count;
-            float shouldAttack = Mathf.Clamp(structureCount - 1, 0, 1) * Mathf.Clamp(troopsCount - minTroops, 0, 1);
+            bool shouldAttack = troopsCount >= minTroops;
             float shouldBuildArmy = Mathf.Clamp(structureCount - 3, 0, 1) * Mathf.Clamp(minTroops - troopsCount, 0, 1);
-
+            
             if (this.myBases.Count == 0 && this.currentState != PlanningAgent.AgentState.BUILDING_BASE)
             {
                 this.mainBaseNbr = -1;
@@ -776,9 +791,9 @@ namespace GameManager
             {
                 this.UpdateState(PlanningAgent.AgentState.BUILDING_ARCHER);
             }
-            else if (shouldAttack == 1.0)
+            else
             {
-                this.UpdateState(PlanningAgent.AgentState.WINNING);
+                this.UpdateState(PlanningAgent.AgentState.WAITING);
             }
             // end state machine //
 
@@ -798,21 +813,8 @@ namespace GameManager
             if (this.currentState == PlanningAgent.AgentState.BUILDING_BARRACKS)
             {               
 
-                // if we need barracks or refineries and have the appropriate dependency, build them
-                // work on this
-                if (ShouldBuildBarracksFunc())
-                {
-                    this.BuildBuilding(UnitType.BARRACKS);
-                    if (this.myArchers.Count + this.mySoldiers.Count > (this.maxArchers + this.maxSoldiers / 2))
-                    {
-                        buildMoreBarracks = true;
-                        Debug.LogError("buildMoreBarracks " + buildMoreBarracks.ToString());
-                    }
-                    else if (this.myBarracks.Count >= this.maxBarracks)
-                    {
-                        buildMoreBarracks = false;
-                    }
-                }
+                // if we need barracks, build them
+                this.BuildBuilding(UnitType.BARRACKS);              
 
                 DoWork();
 
@@ -848,7 +850,7 @@ namespace GameManager
                 {
                     Unit b = GameManager.Instance.GetUnit(barrack);
                     this.Train(b, UnitType.SOLDIER);
-                    buildSoldierCounter++;
+                    this.buildSoldierCounter++;
                 }
 
                 this.DoWork();
@@ -861,13 +863,13 @@ namespace GameManager
                 {
                     Unit b = GameManager.Instance.GetUnit(barrack);
                     this.Train(b, UnitType.ARCHER);
-                    buildSoldierCounter = 0;
+                    this.buildSoldierCounter = 0;
                 }
 
                 this.DoWork();
             }
                         
-            if (this.currentState == PlanningAgent.AgentState.WINNING)
+            if (shouldAttack)
             {
                 AttackEnemy(mySoldiers);
                 AttackEnemy(myArchers);
@@ -885,12 +887,12 @@ namespace GameManager
             foreach (int worker in myWorkers)
             {
                 Unit w = GameManager.Instance.GetUnit(worker);
-                float shouldGather = (!w.Equals(null) ? 1 : 0) * (w.CurrentAction == UnitAction.IDLE ? 1 : 0) * Mathf.Clamp(this.mainBaseNbr + 1, 0, 1) * Mathf.Clamp(this.mainMineNbr + 1, 0, 1);
+                float shouldGather = (!(w == null) ? 1 : 0) * (w.CurrentAction == UnitAction.IDLE ? 1 : 0) * Mathf.Clamp(this.mainBaseNbr + 1, 0, 1) * Mathf.Clamp(this.mainMineNbr + 1, 0, 1);
                 if (shouldGather == 1.0)
                 {
                     Unit m = GameManager.Instance.GetUnit(this.mainMineNbr);
                     Unit b = GameManager.Instance.GetUnit(this.mainBaseNbr);
-                    if (!m.Equals(null) && !b.Equals(null) && b.Health > 0.0)
+                    if (!(m == null) && !(b == null) && b.Health > 0.0)
                     {
                         this.Gather(w, m, b);
                     }
