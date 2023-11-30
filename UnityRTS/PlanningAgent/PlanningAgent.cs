@@ -19,18 +19,19 @@ namespace GameManager
     {
         private const int MAX_NBR_WORKERS = 20;
         private PlanningAgent.AgentState currentState;
-        private int maxWorkers = 15;
-        private int minWorkers = 5;
-        private int minTroops = 2;
-        private int maxArchers = 10;
-        private int minArchers = 5;
-        private int maxSoldiers = 10;
-        private int minSoldiers = 5;
-        private int maxBases = 2;
-        private int maxBarracks = 2;
-        private int maxRefineries = 2;
+
+        // all of these values must be no less than 2 if enabling learning
+        private int maxWorkers = 14;    // orig 15, learned 14
+        private int minWorkers = 4;     // orig 5, learned 4
+        private int minTroops = 1;      // orig 2, learned 1
+        private int maxArchers = 9;    // orig 10, learned 9
+        private int minArchers = 4;     // orig 5, learned 4
+        private int maxSoldiers = 9;   // orig 10, learned 9
+        private int minSoldiers = 4;    // orig 5, learned 4
+        private int maxBases = 1;       // orig 2, learned 1
+        private int maxBarracks = 1;    // orig 2, learned 1
+        private int maxRefineries = 1;  // orig 2, learned 1
         private int buildSoldierCounter = 0;
-        private bool buildMoreBarracks = false;
 
         // used for learn method
         private const int LEARN_MIN_TROOPS = 0;
@@ -288,11 +289,11 @@ namespace GameManager
         /// <returns></returns>
         private int GetNextIndex(int[] array, int index)
         {
-            if (index > array.Length - 1)
+            if (index >= array.Length - 1)
             {
                 index = 0;
                 counterToReset++;
-                if (counterToReset >= 3) {
+                if (counterToReset >= 2) {
                     RandomReset();
                     counterToReset = 0;
                 }
