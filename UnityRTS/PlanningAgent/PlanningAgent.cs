@@ -19,6 +19,7 @@ namespace GameManager
     {
         private const int MAX_NBR_WORKERS = 20;
         private PlanningAgent.AgentState currentState;
+        private Vector3Int baseLocation = new Vector3Int();
 
         // all of these values must be no less than 2 if enabling learning
         private int maxWorkers = 14;    // orig 15, learned 14
@@ -493,18 +494,17 @@ namespace GameManager
         private void SetMainMine()
         {
             // if mines exist
-            if (mines.Count > 0)
+            if (mines.Count > 0 && myBases.Count > 0)
             {
-                // find mine with health, set it as main mine
-                for (int i = 0; i < this.mines.Count; ++i)
-                {
-                    if (GameManager.Instance.GetUnit(this.mines[i]).Health > 0)
-                    {
-                        this.mainMineNbr = this.mines[i];
-                        break;
-                    }
-                }
-            }            
+                this.baseLocation = GameManager.Instance.GetUnit(this.mainBaseNbr).GridPosition;
+                this.mainMineNbr = (int)NearestUnit(this.mines, this.baseLocation)[0];
+            }
+            
+            else if (mines.Count > 0 && myWorkers.Count > 0)
+            {
+                Vector3Int workerLocation = GameManager.Instance.GetUnit(myWorkers[0]).GridPosition;
+                this.mainMineNbr = (int)NearestUnit(this.mines, workerLocation)[0];
+            }
 
             // otherwise, no mines exist
             else
@@ -546,7 +546,7 @@ namespace GameManager
         /// <returns></returns>
         private bool ShouldBuildWorkerFunc()
         {
-            return (this.myWorkers.Count < this.minWorkers || (myArchers.Count + mySoldiers.Count) >= (maxArchers + maxSoldiers));
+            return (this.myWorkers.Count < this.minWorkers || ((myArchers.Count + mySoldiers.Count) >= (maxArchers + maxSoldiers)) && this.myWorkers.Count < this.maxWorkers );
         }
 
         /// <summary>

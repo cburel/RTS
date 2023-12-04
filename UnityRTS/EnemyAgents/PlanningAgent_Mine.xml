@@ -142,6 +142,11 @@
             </summary>
             <param name="myTroops"></param>
         </member>
+        <member name="M:GameManager.PlanningAgent.NearestUnit(System.Collections.Generic.List{System.Int32},UnityEngine.Vector3Int)">
+            <summary>
+            gets the nearest unit
+            </summary>
+        </member>
         <member name="M:GameManager.PlanningAgent.SetMainMine">
             <summary>
             sets the main mine
