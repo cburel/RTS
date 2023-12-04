@@ -403,25 +403,47 @@ namespace GameManager
                     Unit troopUnit = GameManager.Instance.GetUnit(troopNbr);
                     if (troopUnit.CurrentAction == UnitAction.IDLE)
                     {
-                        // If there are archers to attack
-                        if (enemyArchers.Count > 0)
-                        {
-                            Attack(troopUnit, GameManager.Instance.GetUnit(enemyArchers[UnityEngine.Random.Range(0, enemyArchers.Count)]));
-                        }
-                        // If there are soldiers to attack
-                        else if (enemySoldiers.Count > 0)
-                        {
-                            Attack(troopUnit, GameManager.Instance.GetUnit(enemySoldiers[UnityEngine.Random.Range(0, enemySoldiers.Count)]));
-                        }
-                        // If there are workers to attack
-                        else if (enemyWorkers.Count > 0)
-                        {
-                            Attack(troopUnit, GameManager.Instance.GetUnit(enemyWorkers[UnityEngine.Random.Range(0, enemyWorkers.Count)]));
+                        if (enemyArchers.Count + enemySoldiers.Count > 0) {
+                            List<int> archerList = new List<int>();
+                            List<int> soldierList = new List<int>();
+                            float archerDist = float.MaxValue;
+                            float soldierDist = float.MaxValue;
+
+                            // If there are archers to attack
+                            if (enemyArchers.Count > 0)
+                            {
+                                archerList = NearestUnit(enemyArchers, troopUnit.GridPosition);
+                                Unit unitInstance = GameManager.Instance.GetUnit(archerList[0]);
+                                archerDist = Vector3Int.Distance(unitInstance.GridPosition, troopUnit.GridPosition);
+                            }
+                            // If there are soldiers to attack
+                            else if (enemySoldiers.Count > 0)
+                            {
+                                soldierList = NearestUnit(enemySoldiers, troopUnit.GridPosition);
+                                Unit unitInstance = GameManager.Instance.GetUnit(soldierList[0]);
+                                soldierDist = Vector3Int.Distance(unitInstance.GridPosition, troopUnit.GridPosition);
+                            }
+
+                            if (archerDist < soldierDist)
+                            {
+                                Attack(troopUnit, GameManager.Instance.GetUnit(archerList[0]));
+                            }
+                            else
+                            {
+                                Attack(troopUnit, GameManager.Instance.GetUnit(soldierList[0]));
+                            }
                         }
                         // If there are bases to attack
                         else if (enemyBases.Count > 0)
                         {
                             Attack(troopUnit, GameManager.Instance.GetUnit(enemyBases[UnityEngine.Random.Range(0, enemyBases.Count)]));
+                        }
+                        // If there are workers to attack
+                        else if (enemyWorkers.Count > 0)
+                        {
+                            List<int> workerList = NearestUnit(enemyWorkers, troopUnit.GridPosition);
+                            Unit unitInstance = GameManager.Instance.GetUnit(workerList[0]);
+                            Attack(troopUnit, unitInstance);
                         }
                         // If there are barracks to attack
                         else if (enemyBarracks.Count > 0)
@@ -467,11 +489,11 @@ namespace GameManager
         /// <summary>
         /// gets the nearest unit
         /// </summary>
-        private List<float> NearestUnit(List<int> units, Vector3Int gridPos)
+        private List<int> NearestUnit(List<int> units, Vector3Int gridPos)
         {
-            float unitNum = 0f;
+            int unitNum = 0;
             float minDist = int.MaxValue;
-            List<float> unitList = new List<float>();
+            List<int> unitList = new List<int>();
 
             foreach (int unit in units)
             {
@@ -500,13 +522,13 @@ namespace GameManager
             if (mines.Count > 0 && myBases.Count > 0)
             {
                 this.baseLocation = GameManager.Instance.GetUnit(this.mainBaseNbr).GridPosition;
-                this.mainMineNbr = (int)NearestUnit(this.mines, this.baseLocation)[0];
+                this.mainMineNbr = NearestUnit(this.mines, this.baseLocation)[0];
             }
             
             else if (mines.Count > 0 && myWorkers.Count > 0)
             {
                 Vector3Int workerLocation = GameManager.Instance.GetUnit(myWorkers[0]).GridPosition;
-                this.mainMineNbr = (int)NearestUnit(this.mines, workerLocation)[0];
+                this.mainMineNbr = NearestUnit(this.mines, workerLocation)[0];
             }
 
             // otherwise, no mines exist
