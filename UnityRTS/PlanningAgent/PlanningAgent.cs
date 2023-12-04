@@ -461,6 +461,33 @@ namespace GameManager
         #region helper functions
 
         /// <summary>
+        /// gets the nearest unit
+        /// </summary>
+        private List<float> NearestUnit(List<int> units, Vector3Int gridPos)
+        {
+            float unitNum = 0f;
+            float minDist = int.MaxValue;
+            List<float> unitList = new List<float>();
+
+            foreach (int unit in units)
+            {
+                Unit unitInstance = GameManager.Instance.GetUnit(unit);
+                if (unitInstance != null)
+                {
+                    float dist = Vector3Int.Distance(unitInstance.GridPosition, gridPos);
+                    if (dist < minDist)
+                    {
+                        minDist = dist;
+                        unitNum = unit;
+                    }
+                }
+            }
+
+            unitList.Add(unitNum);
+            return unitList;
+        }
+
+        /// <summary>
         /// sets the main mine
         /// </summary>
         private void SetMainMine()
