@@ -355,6 +355,9 @@ namespace GameManager
                 // Grab the unit we need for this function
                 Unit unit = GameManager.Instance.GetUnit(worker);
 
+                // grab main mine
+                Unit mine = GameManager.Instance.GetUnit(this.mainMineNbr);
+
                 // Make sure this unit actually exists and we have enough gold
                 if (unit != null && Gold >= Constants.COST[unitType])
                 {
@@ -369,7 +372,7 @@ namespace GameManager
 
                         if (GameManager.Instance.IsBoundedAreaBuildable(unitType, toBuild))
                         {
-                            int distance = (int)Mathf.Pow((toBuild.x - unit.GridPosition.x), 2) + (int)Mathf.Pow((toBuild.y - unit.GridPosition.y), 2);
+                            int distance = (int)Mathf.Pow((toBuild.x - mine.GridPosition.x), 2) + (int)Mathf.Pow((toBuild.y - mine.GridPosition.y), 2);
                             if (distance < minDistance)
                             {
                                 minDistance = distance;
