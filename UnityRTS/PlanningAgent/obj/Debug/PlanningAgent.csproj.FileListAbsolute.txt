@@ -355,3 +355,4 @@ D:\UCCS\FA23\GDD3400\apps\repos\RTS\UnityRTS\PlanningAgent\obj\Debug\PlanningAge
 D:\UCCS\FA23\GDD3400\apps\repos\RTS\UnityRTS\PlanningAgent\obj\Debug\PlanningAgent.csproj.CopyComplete
 D:\UCCS\FA23\GDD3400\apps\repos\RTS\UnityRTS\PlanningAgent\obj\Debug\PlanningAgent.dll
 D:\UCCS\FA23\GDD3400\apps\repos\RTS\UnityRTS\PlanningAgent\obj\Debug\PlanningAgent.pdb
+D:\UCCS\FA23\GDD3400\apps\repos\RTS\UnityRTS\PlanningAgent\obj\Debug\PlanningAgent.csprojAssemblyReference.cache
